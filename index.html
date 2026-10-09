@@ -201,20 +201,20 @@ function step(){
     if(w.st==='chute'){
       w.ph+=.03;w.y+=w.vy;w.x+=Math.sin(w.ph)*.5;
       throwAt(w);
-      if(w.y>=GROUND-14){w.st='landed';w.y=GROUND-14;sfx('thud');w.walk=.45+(level-1)*.08;popText(w.x,w.y-30,'着地');}
+      if(w.y>=GROUND-14){w.st='landed';w.y=GROUND-14;sfx('thud');w.walk=.45+(level-1)*.08;}
     }else if(w.st==='fall'){
       w.fy+=.35;w.y+=w.fy;w.rot+=w.vr;
       if(w.y>GROUND){w.dead=1;puff(w.x,GROUND-4,'#c9b08a',10)}
     }else if(w.st==='landed'){
       w.x-=w.walk;w.ph+=.25;
-      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);popText(w.x+20,w.y-30,'突破された');hurt()}
+      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);hurt()}
     }else if(w.st==='rise'){
       w.ph+=.04;w.y-=w.vy;w.x+=Math.sin(w.ph)*.4;throwAt(w);
-      if(w.y<=RISE_LIMIT){w.st='drift';w.y=RISE_LIMIT;w.drift=.3+(level-2)*.06;popText(w.x,w.y+26,'崖へ向かってくる');}
+      if(w.y<=RISE_LIMIT){w.st='drift';w.y=RISE_LIMIT;w.drift=.3+(level-2)*.06;}
     }else if(w.st==='drift'){
       // 上まで昇ったオオカミは、風船につかまったまま崖のほうへ流されていく
       w.ph+=.05;w.x-=w.drift;w.y=RISE_LIMIT+Math.sin(w.ph)*3;throwAt(w);
-      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);popText(w.x+30,w.y+26,'突破された');hurt()}
+      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);hurt()}
     }
   }
   // 矢の当たり判定（パラシュートか体）
