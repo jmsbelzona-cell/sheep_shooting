@@ -210,7 +210,11 @@ function step(){
       if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);popText(w.x+20,w.y-30,'突破された');hurt()}
     }else if(w.st==='rise'){
       w.ph+=.04;w.y-=w.vy;w.x+=Math.sin(w.ph)*.4;throwAt(w);
-      if(w.y<=RISE_LIMIT){w.dead=1;puff(w.x,w.y,'#c9b08a',10);popText(w.x,w.y+20,'昇り切られた');hurt()}
+      if(w.y<=RISE_LIMIT){w.st='drift';w.y=RISE_LIMIT;w.drift=.3+(level-2)*.06;popText(w.x,w.y+26,'崖へ向かってくる');}
+    }else if(w.st==='drift'){
+      // 上まで昇ったオオカミは、風船につかまったまま崖のほうへ流されていく
+      w.ph+=.05;w.x-=w.drift;w.y=RISE_LIMIT+Math.sin(w.ph)*3;throwAt(w);
+      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);popText(w.x+30,w.y+26,'突破された');hurt()}
     }
   }
   // 矢の当たり判定（パラシュートか体）
@@ -219,11 +223,11 @@ function step(){
       if(a.dead||w.st==='fall')continue;
       let cx=w.x,cy=w.y-34,onTop=false;
       if(w.st==='chute')onTop=Math.hypot(a.x-cx,a.y-cy)<22&&a.y<cy+6;
-      if(w.st==='rise'){cy=w.y-32;onTop=Math.hypot(a.x-cx,a.y-cy)<13}
+      if(w.st==='rise'||w.st==='drift'){cy=w.y-32;onTop=Math.hypot(a.x-cx,a.y-cy)<13}
       const onBody=Math.abs(a.x-w.x)<13&&Math.abs(a.y-w.y)<15;
       if(onTop||onBody){
-        a.dead=1;sfx('hit');sfx('fall');const was=w.st;w.st='fall';w.fy=was==='rise'?-1:0;w.vr=(Math.random()-.5)*.25;
-        const pts=was==='landed'?10:was==='rise'?20+10*Math.floor((GROUND-w.y)/100):10*(1+Math.floor((GROUND-w.y)/90));
+        a.dead=1;sfx('hit');sfx('fall');const was=w.st;w.st='fall';w.fy=was==='rise'||was==='drift'?-1:0;w.vr=(Math.random()-.5)*.25;
+        const pts=was==='landed'||was==='drift'?20:was==='rise'?20+10*Math.floor((GROUND-w.y)/100):10*(1+Math.floor((GROUND-w.y)/90));
         kills++;addScore(pts);popText(w.x,w.y-40,'+'+pts);
         puff(cx,cy,KIND_COL[w.kind],14);
       }
@@ -431,7 +435,7 @@ function drawWolf(w){
     ctx.beginPath();ctx.moveTo(0,cy);ctx.arc(0,cy,22,Math.PI*1.25,Math.PI*1.42);ctx.closePath();ctx.fill();
     ctx.beginPath();ctx.moveTo(0,cy);ctx.arc(0,cy,22,Math.PI*1.58,Math.PI*1.75);ctx.closePath();ctx.fill();
   }
-  if(w.st==='rise'){
+  if(w.st==='rise'||w.st==='drift'){
     const by=-32,col=KIND_COL[w.kind];
     ctx.strokeStyle='#555';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,by+14);ctx.quadraticCurveTo(3,by+22,0,-14);ctx.stroke();
     ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,by,12,14,0,0,6.28);ctx.fill();
