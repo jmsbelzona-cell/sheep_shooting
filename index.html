@@ -505,8 +505,8 @@ function endStep(){
   if(endT>60&&endT%14===0)hearts.push({x:CLIFF+40+Math.random()*(W-CLIFF-80),y:GROUND-30,vy:.6+Math.random()*.5,ph:Math.random()*6,l:160,c:Math.random()<.5?'#ff7a9a':'#ffcf5c'});
   hearts.forEach(h=>{h.y-=h.vy;h.ph+=.05;h.l--});hearts=hearts.filter(h=>h.l>0);
   if(endT===200){const o=$('ov');o.classList.add('end');
-    o.querySelector('h1').textContent='家族を守りぬいた';
-    o.querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='長い夜が明けて、朝が来た。<br>羊の親子が大喜びしている。<br>得点 '+score;
+    o.querySelector('h1').textContent='家族は無事だった';
+    o.querySelector('.rules').hidden=true;$('msg').hidden=true;
     $('start').textContent='もう一度';o.hidden=false}
 }
 function sheepStand(x,y,k,hop,face){
@@ -530,7 +530,7 @@ function drawEnding(){
     const hop=Math.abs(Math.sin(t*.12))*5;
     sheepStand(px,GROUND-6,1.35,hop,-1);
     ctx.font='15px "DotGothic16", monospace';ctx.textAlign='center';
-    if(t>150){ctx.lineWidth=4;ctx.strokeStyle='#fff6e6';ctx.strokeText('みんな無事でよかった',px+40,GROUND-46);ctx.fillStyle='#2b1d0e';ctx.fillText('みんな無事でよかった',px+40,GROUND-46)}ctx.textAlign='left';
+ctx.textAlign='left';
   }
   // 子どもたちが小屋の方から駆け寄って跳ねる
   [[0,0],[1,.9],[2,1.8]].forEach(([i,d])=>{
