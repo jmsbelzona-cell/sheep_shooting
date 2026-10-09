@@ -108,7 +108,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=4,NEED=[15,20,25,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
-  sfx('clear');
+  sfx('clear');Music.stop();bgm.pause();setTimeout(()=>{if(ending)playMusic()},1300);
   running=false;ending=true;endT=0;hearts=[];
   wolves.forEach(w=>puff(w.x,w.y,'#c9b08a',8));wolves=[];stones=[];items=[];arrows=[];power=0;bannerT=0;
   phFrom=phTo;phTo=1;phT=0;
@@ -555,11 +555,18 @@ reset();draw();requestAnimationFrame(loop);
 const bgm=new Audio();bgm.loop=true;bgm.volume=.5;let muted=false;
 /* 内蔵の曲（ゲームのために作った短いループ曲） */
 const Music=(()=>{
-  const BPM=132,E=60/BPM/2; // 八分音符の長さ
   const _=null;
   const LEAD=[72,76,79,76,77,81,79,_, 76,79,84,79,81,79,76,_, 74,77,81,77,79,77,74,_, 71,74,79,74,72,_,_,_,
               72,76,79,76,77,81,84,81, 79,76,72,76,77,74,71,_, 69,72,77,81,79,76,72,76, 74,79,71,74,72,_,72,_];
   const ROOT=[48,48,50,43,48,43,41,43];
+  // クリア後の曲：ゆったりした明るい曲
+  const CLEAR_LEAD=[76,_,79,_,84,_,83,81, 79,_,_,_,76,_,_,_, 77,_,81,_,84,_,86,84, 83,_,_,_,79,_,_,_,
+                    76,_,79,_,84,_,88,86, 84,_,81,_,79,_,77,76, 74,_,77,_,79,_,83,86, 84,_,_,_,_,_,_,_];
+  const SONGS={
+    main:{bpm:132,lead:LEAD,root:ROOT,wave:'square',vol:.07,len:.9,hat:true},
+    clear:{bpm:92,lead:CLEAR_LEAD,root:[48,52,41,43,45,41,43,48],wave:'triangle',vol:.2,len:1.8,hat:false}
+  };
+  let cur='main';
   let ac=null,master=null,fx=null,timer=null,next=0,step=0,noise=null;
   function tone(type,f,t,d,v){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d);
@@ -568,11 +575,12 @@ const Music=(()=>{
     g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.06)}
   const hz=m=>440*Math.pow(2,(m-69)/12);
   function tick(){
+    const S=SONGS[cur],E=60/S.bpm/2; // 八分音符の長さ
     while(next<ac.currentTime+.2){
-      const n=LEAD[step%LEAD.length],bar=Math.floor(step/8)%8,inBar=step%8;
-      if(n!==null)tone('square',hz(n),next,E*.9,.07);
-      if(inBar%2===0){const r=ROOT[bar]+(inBar%4===2?7:0);tone('triangle',hz(r),next,E*1.8,.22)}
-      hat(next,inBar%2?.05:.025);
+      const n=S.lead[step%S.lead.length],bar=Math.floor(step/8)%8,inBar=step%8;
+      if(n!==null)tone(S.wave,hz(n),next,E*S.len,S.vol);
+      if(S.hat){if(inBar%2===0){const r=S.root[bar]+(inBar%4===2?7:0);tone('triangle',hz(r),next,E*1.8,.22)}hat(next,inBar%2?.05:.025)}
+      else if(inBar%2===0){const r=S.root[bar]+[0,7,12,7][inBar/2];tone('sine',hz(r),next,E*2.2,.18)}
       next+=E;step++;
     }
   }
@@ -582,9 +590,9 @@ const Music=(()=>{
         noise=ac.createBuffer(1,ac.sampleRate*.1,ac.sampleRate);const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
       if(ac.state==='suspended')ac.resume();
     },
-    start(){
+    start(name='main'){
       this.init();if(!ac)return;
-      if(timer)return;next=ac.currentTime+.05;step=0;timer=setInterval(tick,25);
+      if(timer&&cur===name)return;this.stop();cur=name;next=ac.currentTime+.05;step=0;timer=setInterval(tick,25);
     },
     stop(){if(timer){clearInterval(timer);timer=null}},
     sfx(n){
@@ -614,7 +622,7 @@ const Music=(()=>{
     }
   };
 })();
-function playMusic(){Music.init();if(muted)return;if(bgm.src){Music.stop();bgm.play().catch(()=>{})}else Music.start()}
+function playMusic(){Music.init();if(muted)return;if(ending){bgm.pause();Music.start('clear');return}if(bgm.src){Music.stop();bgm.play().catch(()=>{})}else Music.start('main')}
 function sfx(n){if(typeof Music!=='undefined')Music.sfx(n)}
 $('bgmname').textContent='内蔵の曲';
 $('bgmfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
