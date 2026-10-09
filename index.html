@@ -47,14 +47,14 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
 
 </head>
 <body>
-<div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>ステージ <b id="lv">朝</b></span></div>
+<div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>ステージ <b id="lv">1</b></span></div>
 <div class="hud2"><span class="icons" id="livesIc" role="img" aria-label="羊 3匹"></span><span class="icons wolves" id="leftIc" role="img" aria-label="あと15匹"></span></div>
 <div class="wrap">
   <canvas id="c" width="360" height="480" aria-label="ゲーム画面"></canvas>
   <div class="overlay" id="ov">
     <h1>まもれ！<br>ひつじのかぞく</h1>
     <p>ねえ、きみ。話を聞いてくれるかい。<br>丘の小屋には、羊の親子がくらしている。<br>ところが今日、オオカミたちが<br>空からパラシュートでせめてくるんだ。<br>子どもたちを守れるのは、きみだけだ。<br>崖のかごに乗って、弓矢で追いはらっておくれ。</p>
-    <p class="rules">矢は一度に1本だけ。よくねらってね。<br>金のりんごを射ると、しばらく矢を連射できるよ。<br>金の星を射ると、5秒間無敵になるよ。<br>青いオオカミはおりてくるだけ。<br>黄色は玉を1発、赤は2発うってくる。<br>地面におりたオオカミは、崖まで歩いてくる。<br>昼になると、風船で下からも来るぞ。<br>朝は15匹、昼は20匹、夜は30匹。<br>夜明けまで、家族を守りぬいて！</p>
+    <p class="rules">矢は一度に1本だけ。よくねらってね。<br>金のりんごを射ると、しばらく矢を連射できるよ。<br>金の星を射ると、5秒間無敵になるよ。<br>青いオオカミはおりてくるだけ。<br>黄色は玉を1発、赤は2発うってくる。<br>地面におりたオオカミは、崖まで歩いてくる。<br>ステージ2からは、風船で下からも来るぞ。<br>ステージ1は15匹、2は20匹、3は30匹。<br>夜明けまで、家族を守りぬいて！</p>
     <button id="start">はじめる</button>
   </div>
 </div>
@@ -83,11 +83,11 @@ function renderLeft(st){const need=NEED[st-1],got=Math.min(need,kills-(st>1?GOAL
   if(need===_lf&&got===_lk)return;
   if(need!==_lf){e.innerHTML=WOLF_SVG.repeat(need);_lf=need}
   [...e.children].forEach((c,i)=>c.classList.toggle('done',i<got));_lk=got;e.setAttribute('aria-label','あと'+(need-got)+'匹')}
-function updHud(){$('score').textContent=score;renderLives();$('lv').textContent=phaseName(level);
+function updHud(){$('score').textContent=score;renderLives();$('lv').textContent=Math.min(level,FINAL);
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
-  if(nl>level){level=nl;$('lv').textContent=phaseName(level);banner=phaseName(level)+'のステージ'+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextItem=frame+60*(5+Math.random()*35);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
+  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextItem=frame+60*(5+Math.random()*35);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=3,NEED=[15,20,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');
@@ -589,7 +589,7 @@ $('bgmname').textContent='内蔵の曲';
 $('bgmfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
   bgm.src=URL.createObjectURL(f);$('bgmname').textContent=f.name.replace(/\.[^.]+$/,'');Music.stop();bgm.currentTime=0;playMusic()});
 $('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'音を出す':'音を消す';if(muted){bgm.pause();Music.stop()}else playMusic()};
-$('start').onclick=()=>{reset();$('ov').hidden=true;running=true;banner='朝のステージ';bannerT=150;playMusic()};
+$('start').onclick=()=>{reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()};
 // ブラウザの決まりで、最初に画面を触るかキーを押した時から鳴らし始める
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>playMusic(),{once:true}));
 addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;
