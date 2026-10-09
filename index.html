@@ -33,7 +33,14 @@ canvas{display:block;height:100%;max-width:100%;aspect-ratio:3/4;background:var(
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;background:rgba(20,40,30,.7);padding-inline:16px}
 .overlay.end{justify-content:flex-start;padding-top:28px;background:linear-gradient(rgba(20,40,30,.72) 0,rgba(20,40,30,.5) 45%,transparent 70%)}
 .overlay h1{margin:0;font-size:30px;line-height:1.25;font-weight:400;color:var(--fg);text-shadow:0 3px 0 #6b4320;text-wrap:balance}
-.overlay p.rules{font-size:12px;color:var(--gold);line-height:1.7}
+.overlay .rules{display:flex;flex-direction:column;gap:10px;font-size:13px}
+.lg{display:grid;grid-template-columns:5.2em auto;gap:3px 12px;text-align:left;align-items:center}
+.lgh{grid-column:1/-1;color:var(--gold);font-size:12px;letter-spacing:.1em;border-bottom:1px solid rgba(255,207,92,.4);padding-bottom:2px;margin-bottom:2px}
+.lg span{display:flex;align-items:center;gap:6px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.dot.bal{border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:linear-gradient(90deg,#4f8fe0 50%,#f2c230 50%);height:12px}
+.star{font-style:normal;color:#ffe066;font-size:12px;width:10px;text-align:center}
+.overlay p.oldrules{font-size:12px;color:var(--gold);line-height:1.7}
 .overlay p{margin:0;color:var(--fg);font-size:13px;line-height:1.8;text-wrap:pretty}
 button{font-family:var(--font);font-size:18px;color:#2b1d0e;background:var(--gold);border:0;padding:10px 28px;border-radius:3px;cursor:pointer;box-shadow:0 3px 0 #9a6b12}
 button:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
@@ -53,8 +60,19 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
   <canvas id="c" width="360" height="480" aria-label="ゲーム画面"></canvas>
   <div class="overlay" id="ov">
     <h1>まもれ！<br>ひつじのかぞく</h1>
-    <p>ねえ、きみ。話を聞いてくれるかい。<br>丘の小屋には、羊の親子がくらしている。<br>ところが今日、オオカミたちが<br>空からパラシュートでせめてくるんだ。<br>子どもたちを守れるのは、きみだけだ。<br>崖のかごに乗って、弓矢で追いはらっておくれ。</p>
-    <p class="rules">矢は一度に1本だけ。よくねらってね。<br>金のりんごを射ると、しばらく矢を連射できるよ。<br>金の星を射ると、5秒間無敵になるよ。<br>青いオオカミはおりてくるだけ。<br>黄色は玉を1発、赤は2発うってくる。<br>地面におりたオオカミは、崖まで歩いてくる。<br>ステージ2からは、風船で下からも来るぞ。<br>ステージ1は15匹、2は20匹、3は25匹、4は30匹。<br>夜明けまで、家族を守りぬいて！</p>
+    <p id="msg" hidden></p>
+    <div class="rules">
+      <div class="lg"><span class="lgh">敵</span>
+        <span><i class="dot" style="background:#4f8fe0"></i>青</span><span>おりてくるだけ</span>
+        <span><i class="dot" style="background:#f2c230"></i>黄</span><span>玉を1発うつ</span>
+        <span><i class="dot" style="background:#e4574e"></i>赤</span><span>玉を2発うつ</span>
+        <span><i class="dot bal"></i>風船</span><span>ステージ2から下から昇ってくる</span>
+      </div>
+      <div class="lg"><span class="lgh">アイテム</span>
+        <span><i class="dot" style="background:#ffcf5c"></i>りんご</span><span>しばらく連射できる</span>
+        <span><i class="star">★</i>星</span><span>5秒間むてき</span>
+      </div>
+    </div>
     <button id="start">はじめる</button>
   </div>
 </div>
@@ -134,11 +152,11 @@ function hurt(){
   if(lives<=0)end();
 }
 function end(){
-  if(ending)return;sfx('over');
+  if(ending)return;bannerT=0;co=null;sfx('over');
   running=false;
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
   $('ov').querySelector('h1').textContent='羊たちが逃げ出した';
-  $('ov').querySelector('.rules').hidden=true;$('ov').querySelector('p').innerHTML='得点 '+score+'<br>もう一度挑戦しますか？';
+  $('ov').querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='得点 '+score+'<br>もう一度挑戦しますか？';
   $('start').textContent='もう一度';$('ov').hidden=false;
 }
 
@@ -488,7 +506,7 @@ function endStep(){
   hearts.forEach(h=>{h.y-=h.vy;h.ph+=.05;h.l--});hearts=hearts.filter(h=>h.l>0);
   if(endT===200){const o=$('ov');o.classList.add('end');
     o.querySelector('h1').textContent='家族を守りぬいた';
-    o.querySelector('.rules').hidden=true;$('ov').querySelector('p').innerHTML='長い夜が明けて、朝が来た。<br>羊の親子が大喜びしている。<br>得点 '+score;
+    o.querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='長い夜が明けて、朝が来た。<br>羊の親子が大喜びしている。<br>得点 '+score;
     $('start').textContent='もう一度';o.hidden=false}
 }
 function sheepStand(x,y,k,hop,face){
