@@ -522,8 +522,17 @@ function drawEnding(){
   });
   hearts.forEach(h=>heart(h.x+Math.sin(h.ph)*6,h.y,6,h.c,Math.min(1,h.l/40)));
 }
-function loop(){if(running)step();else if(ending)endStep();draw();requestAnimationFrame(loop)}
-reset();loop();
+// 画面の書き換え回数（60回/秒、120回/秒など）に関係なく、ゲームは常に1秒60コマで進める
+const DT=1000/60;let acc=0,last=null;
+function loop(ts){
+  if(last===null)last=ts;
+  let d=ts-last;last=ts;if(d>250)d=250;acc+=d;
+  let n=0;
+  while(acc>=DT){if(running)step();else if(ending)endStep();acc-=DT;n++}
+  if(n>0)draw();
+  requestAnimationFrame(loop);
+}
+reset();draw();requestAnimationFrame(loop);
 
 const bgm=new Audio();bgm.loop=true;bgm.volume=.5;let muted=false;
 /* 内蔵の曲（ゲームのために作った短いループ曲） */
