@@ -152,7 +152,7 @@ function hurt(){
   if(lives<=0)end();
 }
 function end(){
-  if(ending)return;bannerT=0;co=null;sfx('over');
+  if(ending)return;Music.stop();bgm.pause();setTimeout(()=>{if(!running&&!ending)playMusic()},1200);bannerT=0;co=null;sfx('over');
   running=false;
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
   $('ov').querySelector('h1').textContent='かぞくを守れなかった……';
@@ -564,6 +564,9 @@ const Music=(()=>{
                     76,_,79,_,84,_,88,86, 84,_,81,_,79,_,77,76, 74,_,77,_,79,_,83,86, 84,_,_,_,_,_,_,_];
   const SONGS={
     main:{bpm:132,lead:LEAD,root:ROOT,wave:'square',vol:.07,len:.9,hat:true},
+    title:{bpm:108,lead:[67,_,72,74,76,_,74,72, 74,_,71,_,67,_,_,_, 69,_,72,74,76,_,79,_, 77,_,76,_,74,_,_,_,
+                          72,_,76,79,81,_,79,76, 77,_,74,_,71,_,_,_, 72,74,76,77,79,_,74,_, 72,_,_,_,_,_,_,_],
+           root:[48,43,45,41,48,43,41,48],wave:'square',vol:.06,len:.8,hat:false},
     clear:{bpm:92,lead:CLEAR_LEAD,root:[48,52,41,43,45,41,43,48],wave:'triangle',vol:.2,len:1.8,hat:false}
   };
   let cur='main';
@@ -622,7 +625,8 @@ const Music=(()=>{
     }
   };
 })();
-function playMusic(){Music.init();if(muted)return;if(ending){bgm.pause();Music.start('clear');return}if(bgm.src){Music.stop();bgm.play().catch(()=>{})}else Music.start('main')}
+function playMusic(){Music.init();if(muted)return;if(ending){bgm.pause();Music.start('clear');return}
+  if(!running){bgm.pause();Music.start('title');return}if(bgm.src){Music.stop();bgm.play().catch(()=>{})}else Music.start('main')}
 function sfx(n){if(typeof Music!=='undefined')Music.sfx(n)}
 $('bgmname').textContent='内蔵の曲';
 $('bgmfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
