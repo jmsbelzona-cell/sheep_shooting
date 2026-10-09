@@ -105,7 +105,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
-  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
+  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=4,NEED=[15,20,25,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');
