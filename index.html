@@ -20,6 +20,13 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;
   display:flex;flex-direction:column;align-items:center;padding-block:12px;padding-inline:16px;box-sizing:border-box;gap:8px;
   -webkit-user-select:none;user-select:none;touch-action:none}
 .hud{width:100%;max-width:420px;display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:space-between;font-size:14px;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+.hud2{width:100%;max-width:420px;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;align-items:center;min-height:20px}
+.icons{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
+.icons .sh{width:22px;height:17px}
+.icons.wolves{justify-content:flex-end;max-width:62%}
+.icons .wf{width:12px;height:12px;transition:opacity .3s,transform .3s}
+.icons .wf.done{opacity:.2;transform:scale(.75)}
+.icons .x{font-size:13px;color:var(--gold);margin-left:2px}
 .hud b{color:var(--gold);font-weight:400}
 .wrap{position:relative;width:100%;max-width:420px;flex:1;min-height:0;display:flex;justify-content:center}
 canvas{display:block;height:100%;max-width:100%;aspect-ratio:3/4;background:var(--panel);border:3px solid var(--wood);border-radius:4px}
@@ -40,7 +47,8 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
 
 </head>
 <body>
-<div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>ステージ <b id="lv">朝</b></span><span>あと <b id="left">15</b>匹</span><span>羊 <b id="lives">3</b></span></div>
+<div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>ステージ <b id="lv">朝</b></span></div>
+<div class="hud2"><span class="icons" id="livesIc" role="img" aria-label="羊 3匹"></span><span class="icons wolves" id="leftIc" role="img" aria-label="あと15匹"></span></div>
 <div class="wrap">
   <canvas id="c" width="360" height="480" aria-label="ゲーム画面"></canvas>
   <div class="overlay" id="ov">
@@ -67,9 +75,17 @@ function reset(){
   sheep={y:(TOP+BOTTOM)/2,cd:0,draw:0};arrows=[];wolves=[];stones=[];items=[];parts=[];texts=[];
   score=0;lives=3;frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;extraI=0;kills=0;ending=false;$('ov').classList.remove('end');updHud();
 }
-function updHud(){$('score').textContent=score;$('lives').textContent=Math.max(lives,0);$('lv').textContent=phaseName(level);
+const SHEEP_SVG='<svg viewBox="0 0 24 18" class="sh" aria-hidden="true"><g fill="#fbfaf4"><circle cx="10" cy="8" r="5"/><circle cx="15" cy="7" r="5"/><circle cx="18" cy="10" r="4"/><circle cx="12" cy="11" r="5"/></g><ellipse cx="5" cy="8" rx="3.4" ry="4" fill="#3b3330"/><rect x="9" y="14" width="2" height="4" fill="#3b3330"/><rect x="15" y="14" width="2" height="4" fill="#3b3330"/><rect x="4" y="6" width="1.4" height="1.4" fill="#fff"/></svg>',WOLF_SVG='<svg viewBox="0 0 16 16" class="wf" aria-hidden="true"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg>';
+let _lv=-1,_lk=-1,_lf=-1;
+function renderLives(){const n=Math.max(lives,0);if(n===_lv)return;_lv=n;const e=$('livesIc');
+  e.innerHTML=n<=8?SHEEP_SVG.repeat(n):SHEEP_SVG+'<span class="x">×'+n+'</span>';e.setAttribute('aria-label','羊 '+n+'匹')}
+function renderLeft(st){const need=NEED[st-1],got=Math.min(need,kills-(st>1?GOAL[st-2]:0)),e=$('leftIc');
+  if(need===_lf&&got===_lk)return;
+  if(need!==_lf){e.innerHTML=WOLF_SVG.repeat(need);_lf=need}
+  [...e.children].forEach((c,i)=>c.classList.toggle('done',i<got));_lk=got;e.setAttribute('aria-label','あと'+(need-got)+'匹')}
+function updHud(){$('score').textContent=score;renderLives();$('lv').textContent=phaseName(level);
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
-  $('left').textContent=Math.max(0,GOAL[Math.min(nl,FINAL)-1]-kills);
+  renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
   if(nl>level){level=nl;$('lv').textContent=phaseName(level);banner=phaseName(level)+'のステージ'+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextItem=frame+60*(5+Math.random()*35);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=3,NEED=[15,20,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
