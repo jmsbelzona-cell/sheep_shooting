@@ -119,7 +119,7 @@ const EXTRA=[500,1500,3000];let extraI=0;
 let co=null;const CO_TIME=100;
 function callout(title,sub,col,edge){co={title,sub,col,edge,t:CO_TIME}}
 function addScore(n){score+=n;
-  while(extraI<EXTRA.length&&score>=EXTRA[extraI]){extraI++;lives++;sfx('life');callout('1UP','なかまの羊が1匹ふえた','#ffffff','#e4574e');puff(SX,sheep.y,'#fff6e6',16)}
+  while(extraI<EXTRA.length&&score>=EXTRA[extraI]){extraI++;lives++;sfx('life');callout('1UP！','','#ffffff','#e4574e');puff(SX,sheep.y,'#fff6e6',16)}
   updHud()}
 
 function spawn(){
@@ -225,7 +225,7 @@ function step(){
   }
   for(const a of arrows)for(const it of items){if(!a.dead&&!it.dead&&Math.hypot(a.x-it.x,a.y-it.y)<14){
     a.dead=1;it.dead=1;puff(it.x,it.y,'#ffcf5c',20);
-    if(it.type==='star'){star=STAR_TIME;sfx('star');callout('むてき','5秒間、なにが来ても平気だ','#fff3a0','#b8860b')}else{power=POWER_TIME;sfx('power');callout('れんしゃ','しばらく矢がたくさん射てる','#ffcf5c','#8a4b12')}}}
+    if(it.type==='star'){star=STAR_TIME;sfx('star');callout('無敵！','','#fff3a0','#b8860b')}else{power=POWER_TIME;sfx('power');callout('連射！','','#ffcf5c','#8a4b12')}}}
   items=items.filter(it=>!it.dead);
   if(bannerT>0)bannerT--;
   if(co&&--co.t<=0)co=null;
@@ -483,15 +483,15 @@ function draw(){
   // 連射の残り時間
   if(power>0){ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(CLIFF+12,10,W-CLIFF-24,8);
     ctx.fillStyle=power<120&&frame%10<5?'#fff':'#ffcf5c';ctx.fillRect(CLIFF+12,10,(W-CLIFF-24)*power/POWER_TIME,8);
-    ctx.font='12px "DotGothic16", monospace';ctx.fillStyle='#2b1d0e';ctx.fillText('れんしゃ',W/2+21,33);ctx.fillStyle='#fff6e6';ctx.fillText('れんしゃ',W/2+20,32);}
+    ctx.font='12px "DotGothic16", monospace';ctx.fillStyle='#2b1d0e';ctx.fillText('連射',W/2+21,33);ctx.fillStyle='#fff6e6';ctx.fillText('連射',W/2+20,32);}
   if(star>0){const y0=power>0?40:10;ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(CLIFF+12,y0,W-CLIFF-24,8);
     ctx.fillStyle=star<60&&frame%10<5?'#fff':'#fff09a';ctx.fillRect(CLIFF+12,y0,(W-CLIFF-24)*star/STAR_TIME,8);
-    ctx.font='12px "DotGothic16", monospace';ctx.fillStyle='#2b1d0e';ctx.fillText('むてき',W/2+21,y0+23);ctx.fillStyle='#fff6e6';ctx.fillText('むてき',W/2+20,y0+22);}
+    ctx.font='12px "DotGothic16", monospace';ctx.fillStyle='#2b1d0e';ctx.fillText('無敵',W/2+21,y0+23);ctx.fillStyle='#fff6e6';ctx.fillText('無敵',W/2+20,y0+22);}
   if(co){const k=CO_TIME-co.t,sc=k<10?1.6-.6*(k/10)*(2-k/10):1,a=Math.min(1,co.t/20),y=H*.3;
     ctx.save();ctx.globalAlpha=a;ctx.translate(W/2+22,y);ctx.scale(sc,sc);ctx.textAlign='center';
     ctx.font='34px "DotGothic16", monospace';ctx.lineJoin='round';ctx.lineWidth=6;ctx.strokeStyle=co.edge;ctx.strokeText(co.title,0,0);
     ctx.fillStyle=co.col;ctx.fillText(co.title,0,0);
-    ctx.font='14px "DotGothic16", monospace';ctx.lineWidth=4;ctx.strokeStyle='rgba(30,20,10,.85)';ctx.strokeText(co.sub,0,24);ctx.fillStyle='#fff6e6';ctx.fillText(co.sub,0,24);
+    ctx.font='14px "DotGothic16", monospace';ctx.lineWidth=4;ctx.strokeStyle='rgba(30,20,10,.85)';if(co.sub){ctx.strokeText(co.sub,0,24);ctx.fillStyle='#fff6e6';ctx.fillText(co.sub,0,24)}
     ctx.restore()}
   if(bannerT>0){ctx.font='28px "DotGothic16", monospace';ctx.globalAlpha=Math.min(1,bannerT/30);
     ctx.fillStyle='#2b1d0e';ctx.fillText(banner,W/2+22,H/2+2);ctx.fillStyle='#fff6e6';ctx.fillText(banner,W/2+20,H/2);ctx.globalAlpha=1}
