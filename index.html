@@ -59,7 +59,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
   </div>
 </div>
 <div class="bgm"><label for="bgmfile">曲を変える</label><input type="file" id="bgmfile" accept="audio/*"><span id="bgmname">内蔵の曲</span><button type="button" id="mute" class="small">音を消す</button></div>
-<div class="help">パソコン: 上下の矢印キー（またはW・S）で移動、スペースで矢を射る<br>スマホ: 画面を上下になぞって移動（触れている間は自動で射る）</div>
+<div class="help">パソコン: 上下の矢印キー（またはW・S）で移動、スペースで矢を射る<br>スマホ: 画面を上下になぞった分だけ移動（触れている間は自動で射る）</div>
 
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
@@ -588,9 +588,12 @@ addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase():e.ke
   if((k===' '||k==='Enter')&&!running&&document.activeElement!==$('start'))$('start').click()});
 addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
 function ty(e){const r=cv.getBoundingClientRect(),t=e.touches[0];return (t.clientY-r.top)/r.height*H}
-cv.addEventListener('touchstart',e=>{touchY=ty(e);e.preventDefault()},{passive:false});
-cv.addEventListener('touchmove',e=>{touchY=ty(e);e.preventDefault()},{passive:false});
-cv.addEventListener('touchend',()=>touchY=null);
+// 指を置いた位置ではなく、指を動かした分だけ籠が動く
+let dragStartY=0,dragSheepY=0;
+cv.addEventListener('touchstart',e=>{dragStartY=ty(e);dragSheepY=sheep?sheep.y:0;touchY=dragSheepY;e.preventDefault()},{passive:false});
+cv.addEventListener('touchmove',e=>{touchY=Math.max(TOP,Math.min(BOTTOM,dragSheepY+(ty(e)-dragStartY)*1.3));e.preventDefault()},{passive:false});
+cv.addEventListener('touchend',e=>{if(e.touches.length===0)touchY=null});
+cv.addEventListener('touchcancel',()=>touchY=null);
 </script>
 
 </body>
