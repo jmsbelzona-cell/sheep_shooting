@@ -54,7 +54,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
   <div class="overlay" id="ov">
     <h1>まもれ！<br>ひつじのかぞく</h1>
     <p>ねえ、きみ。話を聞いてくれるかい。<br>丘の小屋には、羊の親子がくらしている。<br>ところが今日、オオカミたちが<br>空からパラシュートでせめてくるんだ。<br>子どもたちを守れるのは、きみだけだ。<br>崖のかごに乗って、弓矢で追いはらっておくれ。</p>
-    <p class="rules">矢は一度に1本だけ。よくねらってね。<br>金のりんごを射ると、しばらく矢を連射できるよ。<br>金の星を射ると、5秒間無敵になるよ。<br>青いオオカミはおりてくるだけ。<br>黄色は玉を1発、赤は2発うってくる。<br>地面におりたオオカミは、崖まで歩いてくる。<br>ステージ2からは、風船で下からも来るぞ。<br>ステージ1は15匹、2は20匹、3は30匹。<br>夜明けまで、家族を守りぬいて！</p>
+    <p class="rules">矢は一度に1本だけ。よくねらってね。<br>金のりんごを射ると、しばらく矢を連射できるよ。<br>金の星を射ると、5秒間無敵になるよ。<br>青いオオカミはおりてくるだけ。<br>黄色は玉を1発、赤は2発うってくる。<br>地面におりたオオカミは、崖まで歩いてくる。<br>ステージ2からは、風船で下からも来るぞ。<br>ステージ1は15匹、2は20匹、3は25匹、4は30匹。<br>夜明けまで、家族を守りぬいて！</p>
     <button id="start">はじめる</button>
   </div>
 </div>
@@ -73,7 +73,7 @@ const POWER_TIME=60*8;
 
 function reset(){
   sheep={y:(TOP+BOTTOM)/2,cd:0,draw:0};arrows=[];wolves=[];stones=[];items=[];parts=[];texts=[];
-  co=null;score=0;lives=3;frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;extraI=0;kills=0;ending=false;$('ov').classList.remove('end');updHud();
+  co=null;score=0;lives=3;frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;extraI=0;kills=0;ending=false;$('ov').classList.remove('end');updHud();
 }
 const SHEEP_SVG='<svg viewBox="0 0 24 18" class="sh" aria-hidden="true"><g fill="#fbfaf4"><circle cx="10" cy="8" r="5"/><circle cx="15" cy="7" r="5"/><circle cx="18" cy="10" r="4"/><circle cx="12" cy="11" r="5"/></g><ellipse cx="5" cy="8" rx="3.4" ry="4" fill="#3b3330"/><rect x="9" y="14" width="2" height="4" fill="#3b3330"/><rect x="15" y="14" width="2" height="4" fill="#3b3330"/><rect x="4" y="6" width="1.4" height="1.4" fill="#fff"/></svg>',WOLF_SVG='<svg viewBox="0 0 16 16" class="wf" aria-hidden="true"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg>';
 let _lv=-1,_lk=-1,_lf=-1;
@@ -88,7 +88,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
   if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
-const FINAL=3,NEED=[15,20,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
+const FINAL=4,NEED=[15,20,25,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');
   running=false;ending=true;endT=0;hearts=[];
@@ -105,22 +105,22 @@ function addScore(n){score+=n;
   updHud()}
 
 function spawn(){
-  const lv=1+(level-1)*.6;
+  const lv=1+(level-1)*.4;
   wolves.push({x:CLIFF+60+Math.random()*(W-CLIFF-84),y:-30,vy:(.45+Math.random()*.35)*lv,ph:Math.random()*6.28,
-    st:'chute',rot:0,vr:0,fy:0,throwCd:60+Math.random()*120,shots:0,burst:0,kind:pickKind([[.55,.35,.10],[.4,.4,.2],[.3,.4,.3]][level-1]||[.3,.4,.3])});
+    st:'chute',rot:0,vr:0,fy:0,throwCd:60+Math.random()*120,shots:0,burst:0,kind:pickKind([[.55,.35,.10],[.45,.4,.15],[.38,.4,.22],[.3,.4,.3]][level-1]||[.3,.4,.3])});
 }
 function spawnRise(){
-  const lv=1+(level-2)*.3;
+  const lv=1+(level-2)*.15;
   wolves.push({x:CLIFF+70+Math.random()*(W-CLIFF-100),y:GROUND-14,vy:(.5+Math.random()*.3)*lv,ph:Math.random()*6.28,
-    st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=3?[.45,.55,0]:[.6,.4,0])});
+    st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.45,.55,0]:level>=3?[.52,.48,0]:[.6,.4,0])});
 }
 const KIND_COL={blue:'#4f8fe0',yellow:'#f2c230',red:'#e4574e'};
 function pickKind(p){const r=Math.random();return r<p[0]?'blue':r<p[0]+p[1]?'yellow':'red'}
 function throwAt(w){
   if(w.kind==='blue')return;
-  if(w.shots===0&&--w.throwCd<=0&&w.y>40&&w.y<GROUND-60){w.throwCd=(180+Math.random()*220)/(1+(level-1)*.3);w.shots=w.kind==='red'?2:1;w.burst=0}
+  if(w.shots===0&&--w.throwCd<=0&&w.y>40&&w.y<GROUND-60){w.throwCd=(180+Math.random()*220)/(1+(level-1)*.2);w.shots=w.kind==='red'?2:1;w.burst=0}
   if(w.shots>0&&--w.burst<=0){w.shots--;w.burst=14;
-    const dx=SX-w.x,dy=sheep.y-w.y,d=Math.hypot(dx,dy),v=2.6+(level-1)*.5;
+    const dx=SX-w.x,dy=sheep.y-w.y,d=Math.hypot(dx,dy),v=2.6+(level-1)*.33;
     stones.push({x:w.x-10,y:w.y,vx:dx/d*v,vy:dy/d*v});sfx('stone')}
 }
 function puff(x,y,c,n=12){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*2.5+.8;
@@ -161,9 +161,9 @@ function step(){
   if(star>0){star--;if(frame%3===0)parts.push({x:SX+(Math.random()-.5)*36,y:sheep.y+(Math.random()-.5)*30,vx:(Math.random()-.5),vy:-.6-Math.random(),l:26,c:Math.random()<.5?'#fff3a0':'#ffcf5c'})}
   arrows.forEach(a=>a.x+=8);arrows=arrows.filter(a=>a.x<W+20);
   // オオカミ
-  const rate=Math.max(40,100-(level-1)*25);
+  const rate=Math.max(40,100-(level-1)*17);
   if(frame%rate===0)spawn();
-  if(level>=2&&frame%Math.max(120,200-(level-2)*60)===120)spawnRise();
+  if(level>=2&&frame%Math.max(120,200-(level-2)*30)===120)spawnRise();
   // パワーアップの金のりんご
   const appleOut=items.some(it=>it.type==='apple');
   if(!appleOut&&nextItem===Infinity)nextItem=frame+60*(15+Math.random()*10);
@@ -177,7 +177,7 @@ function step(){
     if(w.st==='chute'){
       w.ph+=.03;w.y+=w.vy;w.x+=Math.sin(w.ph)*.5;
       throwAt(w);
-      if(w.y>=GROUND-14){w.st='landed';w.y=GROUND-14;sfx('thud');w.walk=.45+(level-1)*.12;popText(w.x,w.y-30,'着地');}
+      if(w.y>=GROUND-14){w.st='landed';w.y=GROUND-14;sfx('thud');w.walk=.45+(level-1)*.08;popText(w.x,w.y-30,'着地');}
     }else if(w.st==='fall'){
       w.fy+=.35;w.y+=w.fy;w.rot+=w.vr;
       if(w.y>GROUND){w.dead=1;puff(w.x,GROUND-4,'#c9b08a',10)}
@@ -250,7 +250,7 @@ PH.forEach(p=>{for(const k in p)if(typeof p[k]==='string'&&p[k][0]==='#')p[k]=he
 const rgb=(c,a=1)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
 function blend(a,b,t){const o={};for(const k in a){const x=a[k],y=b[k];
   o[k]=Array.isArray(x)?x.map((v,i)=>v+(y[i]-v)*t):typeof x==='number'?x+(y-x)*t:(t<.5?x:y)}return o}
-const STAGES=[1,2,4];
+const STAGES=[1,2,3,4];
 let phFrom=1,phTo=1,phT=1,tick=0;
 function setPhase(lv){const n=STAGES[Math.min(lv,STAGES.length)-1];if(n===phTo)return;phFrom=phTo;phTo=n;phT=0}
 function phaseName(lv){return PH[STAGES[Math.min(lv,STAGES.length)-1]].name}
