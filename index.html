@@ -21,6 +21,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;
   -webkit-user-select:none;user-select:none;touch-action:none}
 .hud{width:100%;max-width:420px;display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:space-between;font-size:14px;letter-spacing:.05em;font-variant-numeric:tabular-nums}
 .hud2{width:100%;max-width:420px;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;align-items:center;min-height:20px}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
 .icons{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
 .icons .sh{width:22px;height:17px}
 .icons.wolves{justify-content:flex-end;max-width:62%}
@@ -97,7 +100,7 @@ const POWER_TIME=60*8;
 
 function reset(){
   sheep={y:(TOP+BOTTOM)/2,cd:0,draw:0};arrows=[];wolves=[];stones=[];items=[];parts=[];texts=[];
-  co=null;score=0;lives=3;frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;extraI=0;kills=0;ending=false;$('ov').classList.remove('end');updHud();
+  co=null;flash=0;marks=[];score=0;lives=3;frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;extraI=0;kills=0;ending=false;$('ov').classList.remove('end');updHud();
 }
 const SHEEP_SVG='<svg viewBox="0 0 24 18" class="sh" aria-hidden="true"><g fill="#fbfaf4"><circle cx="10" cy="8" r="5"/><circle cx="15" cy="7" r="5"/><circle cx="18" cy="10" r="4"/><circle cx="12" cy="11" r="5"/></g><ellipse cx="5" cy="8" rx="3.4" ry="4" fill="#3b3330"/><rect x="9" y="14" width="2" height="4" fill="#3b3330"/><rect x="15" y="14" width="2" height="4" fill="#3b3330"/><rect x="4" y="6" width="1.4" height="1.4" fill="#fff"/></svg>',WOLF_SVG='<svg viewBox="0 0 16 16" class="wf" aria-hidden="true"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg>';
 let _lv=-1,_lk=-1,_lf=-1;
@@ -152,9 +155,14 @@ function puff(x,y,c,n=12){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math
 function popText(x,y,t){texts.push({x,y,t,l:45})}
 
 let star=0,nextStar=Infinity,starStages=[];const STAR_TIME=300;
-function hurt(){
+let flash=0,marks=[];
+function hurt(mx,my){
   if(inv>0||star>0)return;
   lives--;updHud();puff(SX,sheep.y,'#ffffff',24);inv=100;sfx('hurt');
+  // ミスしたことをはっきり見せる：画面が赤く光って揺れ、残機の表示も揺れる
+  flash=48;if(mx!==undefined)marks.push({x:mx,y:my,t:70});
+  [cv,$('livesIc')].forEach(el=>{el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')});
+  if(navigator.vibrate)try{navigator.vibrate(120)}catch(e){}
   if(lives<=0)end();
 }
 function end(){
@@ -207,14 +215,14 @@ function step(){
       if(w.y>GROUND){w.dead=1;puff(w.x,GROUND-4,'#c9b08a',10)}
     }else if(w.st==='landed'){
       w.x-=w.walk;w.ph+=.25;
-      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);hurt()}
+      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);hurt(CLIFF+16,w.y)}
     }else if(w.st==='rise'){
       w.ph+=.04;w.y-=w.vy;w.x+=Math.sin(w.ph)*.4;throwAt(w);
       if(w.y<=RISE_LIMIT){w.st='drift';w.y=RISE_LIMIT;w.drift=.3+(level-2)*.06;}
     }else if(w.st==='drift'){
       // 上まで昇ったオオカミは、風船につかまったまま崖のほうへ流されていく
       w.ph+=.05;w.x-=w.drift;w.y=RISE_LIMIT+Math.sin(w.ph)*3;throwAt(w);
-      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);hurt()}
+      if(w.x<=CLIFF+14){w.dead=1;puff(w.x,w.y,'#c9b08a',10);hurt(CLIFF+16,w.y)}
     }
   }
   // 矢の当たり判定（パラシュートか体）
@@ -238,6 +246,7 @@ function step(){
     if(it.type==='star'){star=STAR_TIME;sfx('star');callout('無敵！','','#fff3a0','#b8860b')}else{power=POWER_TIME;sfx('power');callout('連射！','','#ffcf5c','#8a4b12')}}}
   items=items.filter(it=>!it.dead);
   if(bannerT>0)bannerT--;
+  if(flash>0)flash--;marks.forEach(m=>m.t--);marks=marks.filter(m=>m.t>0);
   if(co&&--co.t<=0)co=null;
   // 石の当たり判定
   for(const s of stones){s.x+=s.vx;s.y+=s.vy;
@@ -505,6 +514,13 @@ function draw(){
     ctx.restore()}
   if(bannerT>0){ctx.font='28px "DotGothic16", monospace';ctx.globalAlpha=Math.min(1,bannerT/30);
     ctx.fillStyle='#2b1d0e';ctx.fillText(banner,W/2+22,H/2+2);ctx.fillStyle='#fff6e6';ctx.fillText(banner,W/2+20,H/2);ctx.globalAlpha=1}
+  // 突破された場所に赤い×印
+  marks.forEach(m=>{const a=Math.min(1,m.t/25),r=11+(70-m.t)*.08;ctx.globalAlpha=a;ctx.lineCap='round';
+    ctx.strokeStyle='#fff';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(m.x-r,m.y-r);ctx.lineTo(m.x+r,m.y+r);ctx.moveTo(m.x+r,m.y-r);ctx.lineTo(m.x-r,m.y+r);ctx.stroke();
+    ctx.strokeStyle='#e0322f';ctx.lineWidth=5;ctx.stroke();ctx.globalAlpha=1});
+  // 画面のふちが赤く光る
+  if(flash>0){const a=Math.min(1,flash/30)*.75,g=ctx.createRadialGradient(W/2,H/2,H*.18,W/2,H/2,H*.7);
+    g.addColorStop(0,'rgba(224,50,47,0)');g.addColorStop(1,`rgba(224,50,47,${a})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}
   ctx.textAlign='left';
 }
 
