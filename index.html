@@ -168,7 +168,9 @@ function step(){
   const appleOut=items.some(it=>it.type==='apple');
   if(!appleOut&&nextItem===Infinity)nextItem=frame+60*(15+Math.random()*10);
   if(frame>=nextItem&&!appleOut){nextItem=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'apple'})}
-  if(frame>=nextStar){nextStar=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'star'})}
+  // 予定時刻になるか、このステージの半分を倒したら、必ず星を出す
+  const stKills=kills-(level>1?GOAL[level-2]:0);
+  if(nextStar!==Infinity&&(frame>=nextStar||stKills>=Math.ceil(NEED[level-1]/2))){nextStar=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'star'})}
   items.forEach(it=>{it.ph+=.04;it.y+=.7;it.x+=Math.sin(it.ph)*.6});
   items=items.filter(it=>it.y<GROUND);
   for(const w of wolves){
