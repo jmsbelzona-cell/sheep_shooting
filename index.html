@@ -155,7 +155,7 @@ function end(){
   if(ending)return;bannerT=0;co=null;sfx('over');
   running=false;
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
-  $('ov').querySelector('h1').textContent='羊たちが逃げ出した';
+  $('ov').querySelector('h1').textContent='かぞくを守れなかった……';
   $('ov').querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='得点 '+score+'<br>もう一度挑戦しますか？';
   $('start').textContent='もう一度';$('ov').hidden=false;
 }
