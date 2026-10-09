@@ -87,7 +87,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
-  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextItem=frame+60*(5+Math.random()*35);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
+  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level+(level===FINAL?' 最終':'');bannerT=150;sfx('stage');setPhase(level);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=3,NEED=[15,20,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');
@@ -165,7 +165,9 @@ function step(){
   if(frame%rate===0)spawn();
   if(level>=2&&frame%Math.max(120,200-(level-2)*60)===120)spawnRise();
   // パワーアップの金のりんご
-  if(frame>=nextItem){nextItem=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'apple'})}
+  const appleOut=items.some(it=>it.type==='apple');
+  if(!appleOut&&nextItem===Infinity)nextItem=frame+60*(15+Math.random()*10);
+  if(frame>=nextItem&&!appleOut){nextItem=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'apple'})}
   if(frame>=nextStar){nextStar=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'star'})}
   items.forEach(it=>{it.ph+=.04;it.y+=.7;it.x+=Math.sin(it.ph)*.6});
   items=items.filter(it=>it.y<GROUND);
