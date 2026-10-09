@@ -125,7 +125,7 @@ function addScore(n){score+=n;
 function spawn(){
   const lv=1+(level-1)*.4;
   wolves.push({x:CLIFF+60+Math.random()*(W-CLIFF-84),y:-30,vy:(.45+Math.random()*.35)*lv,ph:Math.random()*6.28,
-    st:'chute',rot:0,vr:0,fy:0,throwCd:60+Math.random()*120,shots:0,burst:0,kind:pickKind([[.80,.15,.05],[.55,.35,.10],[.30,.55,.15],[.20,.45,.35]][level-1]||[.20,.45,.35])});
+    st:'chute',rot:0,vr:0,fy:0,throwCd:60+Math.random()*120,shots:0,burst:0,kind:pickKind([[.80,.20,0],[.55,.35,.10],[.30,.55,.15],[.20,.45,.35]][level-1]||[.20,.45,.35])});
 }
 function spawnRise(){
   const lv=1+(level-2)*.15;
