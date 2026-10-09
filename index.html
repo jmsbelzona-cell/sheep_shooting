@@ -505,7 +505,7 @@ function endStep(){
   if(endT>60&&endT%14===0)hearts.push({x:CLIFF+40+Math.random()*(W-CLIFF-80),y:GROUND-30,vy:.6+Math.random()*.5,ph:Math.random()*6,l:160,c:Math.random()<.5?'#ff7a9a':'#ffcf5c'});
   hearts.forEach(h=>{h.y-=h.vy;h.ph+=.05;h.l--});hearts=hearts.filter(h=>h.l>0);
   if(endT===200){const o=$('ov');o.classList.add('end');
-    o.querySelector('h1').textContent='家族は無事だった';
+    o.querySelector('h1').textContent='無事家族を守り抜いた';
     o.querySelector('.rules').hidden=true;$('msg').hidden=true;
     $('start').textContent='もう一度';o.hidden=false}
 }
