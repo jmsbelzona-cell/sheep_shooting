@@ -25,7 +25,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;
 @keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}}
 .icons{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
-.icons .sh{width:22px;height:17px}
+.icons .hp{width:20px;height:18px;fill:none;stroke:#ff8fa8;stroke-width:1.6;margin-right:2px}
+.icons .hp.on{fill:#ff5a7a;stroke:#fff}
+.icons .hpl{font-size:12px;color:var(--muted);margin-right:4px}
 .icons.wolves{justify-content:flex-end;max-width:62%}
 .icons .wf{width:12px;height:12px;transition:opacity .3s,transform .3s}
 .icons .wf.done{opacity:.2;transform:scale(.75)}
@@ -63,7 +65,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
 </head>
 <body>
 <div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>ステージ <b id="lv">1</b></span></div>
-<div class="hud2"><span class="icons" id="livesIc" role="img" aria-label="羊 3匹"></span><span class="icons wolves" id="leftIc" role="img" aria-label="あと15匹"></span></div>
+<div class="hud2"><span class="icons" id="livesIc" role="img" aria-label="体力 3"></span><span class="icons wolves" id="leftIc" role="img" aria-label="あと15匹"></span></div>
 <div class="wrap">
   <canvas id="c" width="360" height="480" aria-label="ゲーム画面"></canvas>
   <button type="button" class="gate" id="gate"><span class="gt">まもれ！<br>ひつじのかぞく</span><span class="gs">タップしてスタート</span></button>
@@ -80,6 +82,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
       <div class="lg"><span class="lgh">アイテム</span>
         <span><i class="dot" style="background:#ffcf5c"></i>りんご</span><span>しばらく連射できる</span>
         <span><i class="star">★</i>星</span><span>5秒間むてき</span>
+        <span><i class="star" style="color:#ff6b8a">♥</i>ハート</span><span>体力が1回復</span>
       </div>
     </div>
     <button id="start">はじめる</button>
@@ -100,12 +103,14 @@ const POWER_TIME=60*8;
 
 function reset(){
   sheep={y:(TOP+BOTTOM)/2,cd:0,draw:0};arrows=[];wolves=[];stones=[];items=[];parts=[];texts=[];
-  co=null;flash=0;marks=[];score=0;lives=3;frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;extraI=0;kills=0;ending=false;$('ov').classList.remove('end');updHud();
+  co=null;flash=0;marks=[];score=0;lives=MAXHP;healDone=false;nextHeal=60*(10+Math.random()*25);frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;kills=0;ending=false;$('ov').classList.remove('end');updHud();
 }
 const SHEEP_SVG='<svg viewBox="0 0 24 18" class="sh" aria-hidden="true"><g fill="#fbfaf4"><circle cx="10" cy="8" r="5"/><circle cx="15" cy="7" r="5"/><circle cx="18" cy="10" r="4"/><circle cx="12" cy="11" r="5"/></g><ellipse cx="5" cy="8" rx="3.4" ry="4" fill="#3b3330"/><rect x="9" y="14" width="2" height="4" fill="#3b3330"/><rect x="15" y="14" width="2" height="4" fill="#3b3330"/><rect x="4" y="6" width="1.4" height="1.4" fill="#fff"/></svg>',WOLF_SVG='<svg viewBox="0 0 16 16" class="wf" aria-hidden="true"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg>';
 let _lv=-1,_lk=-1,_lf=-1;
+const MAXHP=3,HEART_SVG='<svg viewBox="0 0 20 18" class="hp" aria-hidden="true"><path d="M10 17 C3 11 0 8 0 5 A5 5 0 0 1 10 3 A5 5 0 0 1 20 5 C20 8 17 11 10 17Z"/></svg>';
 function renderLives(){const n=Math.max(lives,0);if(n===_lv)return;_lv=n;const e=$('livesIc');
-  e.innerHTML=n<=8?SHEEP_SVG.repeat(n):SHEEP_SVG+'<span class="x">×'+n+'</span>';e.setAttribute('aria-label','羊 '+n+'匹')}
+  let h='';for(let i=0;i<MAXHP;i++)h+=HEART_SVG.replace('class="hp"',i<n?'class="hp on"':'class="hp"');
+  e.innerHTML='<span class="hpl">体力</span>'+h;e.setAttribute('aria-label','体力 '+n)}
 function renderLeft(st){const need=NEED[st-1],got=Math.min(need,kills-(st>1?GOAL[st-2]:0)),e=$('leftIc');
   if(need===_lf&&got===_lk)return;
   if(need!==_lf){e.innerHTML=WOLF_SVG.repeat(need);_lf=need}
@@ -114,7 +119,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
-  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
+  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);healDone=false;nextHeal=frame+60*(10+Math.random()*25);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=4,NEED=[15,20,25,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');Music.stop();bgm.pause();setTimeout(()=>{if(ending)playMusic()},1300);
@@ -124,11 +129,10 @@ function startEnding(){
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
 }
 let banner='',bannerT=0,nextItem=0;
-const EXTRA=[500,1500,3000];let extraI=0;
+let healDone=false,nextHeal=Infinity;
 let co=null;const CO_TIME=100;
 function callout(title,sub,col,edge){co={title,sub,col,edge,t:CO_TIME}}
 function addScore(n){score+=n;
-  while(extraI<EXTRA.length&&score>=EXTRA[extraI]){extraI++;lives++;sfx('life');callout('1UP！','','#ffffff','#e4574e');puff(SX,sheep.y,'#fff6e6',16)}
   updHud()}
 
 function spawn(){
@@ -202,6 +206,8 @@ function step(){
   if(frame>=nextItem&&!appleOut){nextItem=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'apple'})}
   // 予定時刻になるか、このステージの半分を倒したら、必ず星を出す
   const stKills=kills-(level>1?GOAL[level-2]:0);
+  // 体力回復のハート：予定時刻になるか、このステージの3分の1を倒したら必ず出す（1ステージ1回）
+  if(!healDone&&(frame>=nextHeal||stKills>=Math.ceil(NEED[level-1]/3))){healDone=true;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'heal'})}
   if(nextStar!==Infinity&&(frame>=nextStar||stKills>=Math.ceil(NEED[level-1]/2))){nextStar=Infinity;items.push({x:CLIFF+70+Math.random()*(W-CLIFF-110),y:-20,ph:0,type:'star'})}
   items.forEach(it=>{it.ph+=.04;it.y+=.7;it.x+=Math.sin(it.ph)*.6});
   items=items.filter(it=>it.y<GROUND);
@@ -243,7 +249,8 @@ function step(){
   }
   for(const a of arrows)for(const it of items){if(!a.dead&&!it.dead&&Math.hypot(a.x-it.x,a.y-it.y)<14){
     a.dead=1;it.dead=1;puff(it.x,it.y,'#ffcf5c',20);
-    if(it.type==='star'){star=STAR_TIME;sfx('star');callout('無敵！','','#fff3a0','#b8860b')}else{power=POWER_TIME;sfx('power');callout('連射！','','#ffcf5c','#8a4b12')}}}
+    if(it.type==='heal'){lives=Math.min(MAXHP,lives+1);updHud();sfx('life');callout('回復！','','#ffd0da','#c2304a');puff(SX,sheep.y,'#ff8fa8',16)}
+    else if(it.type==='star'){star=STAR_TIME;sfx('star');callout('無敵！','','#fff3a0','#b8860b')}else{power=POWER_TIME;sfx('power');callout('連射！','','#ffcf5c','#8a4b12')}}}
   items=items.filter(it=>!it.dead);
   if(bannerT>0)bannerT--;
   if(flash>0)flash--;marks.forEach(m=>m.t--);marks=marks.filter(m=>m.t>0);
@@ -487,6 +494,9 @@ function draw(){
     if(it.type==='star'){const r=10,sp=frame*.05;ctx.fillStyle=`hsl(48,100%,${60+Math.sin(frame*.25)*12}%)`;ctx.beginPath();
       for(let k=0;k<10;k++){const a=sp+k*Math.PI/5-Math.PI/2,rr=k%2?r*.45:r;ctx.lineTo(it.x+Math.cos(a)*rr,it.y+Math.sin(a)*rr)}ctx.closePath();ctx.fill();
       ctx.strokeStyle='#b8860b';ctx.lineWidth=1;ctx.stroke();return}
+    if(it.type==='heal'){const k=1+Math.sin(frame*.15)*.08,x=it.x,y=it.y-2;ctx.save();ctx.translate(x,y);ctx.scale(k,k);
+      ctx.fillStyle='#ff5a7a';ctx.beginPath();ctx.moveTo(0,9);ctx.bezierCurveTo(-13,0,-9,-10,0,-4);ctx.bezierCurveTo(9,-10,13,0,0,9);ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='rgba(255,255,255,.7)';ctx.beginPath();ctx.arc(-4,-3,2,0,6.28);ctx.fill();ctx.restore();return}
     ctx.fillStyle='#ffcf5c';ctx.beginPath();ctx.arc(it.x,it.y,8,0,6.28);ctx.fill();
     ctx.fillStyle='#fff';ctx.globalAlpha=.6;ctx.beginPath();ctx.arc(it.x-3,it.y-3,2.5,0,6.28);ctx.fill();ctx.globalAlpha=1;
     ctx.fillStyle='#4b8139';ctx.beginPath();ctx.ellipse(it.x+3,it.y-9,4,2,-.5,0,6.28);ctx.fill();});
