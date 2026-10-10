@@ -29,6 +29,8 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;
 .icons .hp.on{fill:#ff5a7a;stroke:#fff}
 .icons .hpl{font-size:12px;color:var(--muted);margin-right:4px}
 .icons.wolves{justify-content:flex-end;max-width:62%}
+.icons.wolves.many{max-width:100%;flex-basis:100%;justify-content:flex-start;gap:1px}
+.icons.wolves.many .wf{width:9px;height:9px}
 .icons .wf{width:12px;height:12px;transition:opacity .3s,transform .3s}
 .icons .wf.done{opacity:.2;transform:scale(.75)}
 .icons .x{font-size:13px;color:var(--gold);margin-left:2px}
@@ -117,14 +119,14 @@ function renderLives(){const n=Math.max(lives,0);if(n===_lv)return;_lv=n;const e
   e.innerHTML='<span class="hpl">体力</span>'+h;e.setAttribute('aria-label','体力 '+n)}
 function renderLeft(st){const need=NEED[st-1],got=Math.min(need,kills-(st>1?GOAL[st-2]:0)),e=$('leftIc');
   if(need===_lf&&got===_lk)return;
-  if(need!==_lf){e.innerHTML=WOLF_SVG.repeat(need);_lf=need}
+  if(need!==_lf){e.innerHTML=WOLF_SVG.repeat(need);_lf=need;e.classList.toggle('many',need>30)}
   [...e.children].forEach((c,i)=>c.classList.toggle('done',i<got));_lk=got;e.setAttribute('aria-label','あと'+(need-got)+'匹')}
 function updHud(){$('score').textContent=score;renderLives();$('lv').textContent=Math.min(level,FINAL);
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
   if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);healDone=!HEAL_STAGES.includes(level);nextHeal=frame+60*(10+Math.random()*25);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
-const FINAL=4,NEED=[15,20,25,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
+const FINAL=4,NEED=[20,30,40,50],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');Music.stop();bgm.pause();setTimeout(()=>{if(ending)playMusic()},1300);
   running=false;ending=true;endT=0;hearts=[];
