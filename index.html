@@ -189,7 +189,7 @@ function step(){
   // 矢を射る
   if(sheep.cd>0)sheep.cd--;
   if(sheep.draw>0)sheep.draw--;
-  const maxA=power>0?6:1;
+  const maxA=power>0?4:1;
   if((keys[' ']||touchY!==null)&&arrows.length<maxA&&sheep.cd===0){
     arrows.push({x:SX+32,y:sheep.y-4});sheep.draw=8;sfx('shoot');sheep.cd=power>0?7:0;
   }
