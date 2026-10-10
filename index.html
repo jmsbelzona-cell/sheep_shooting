@@ -106,7 +106,7 @@ const POWER_TIME=60*8;
 
 function reset(){
   sheep={y:(TOP+BOTTOM)/2,cd:0,draw:0};arrows=[];wolves=[];stones=[];items=[];parts=[];texts=[];
-  co=null;flash=0;marks=[];score=0;lives=START_HP;healDone=false;nextHeal=60*(10+Math.random()*25);frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;kills=0;ending=false;$('ov').classList.remove('end');updHud();
+  co=null;flash=0;marks=[];score=0;lives=START_HP;healDone=!HEAL_STAGES.includes(1);nextHeal=60*(10+Math.random()*25);frame=0;inv=0;power=0;level=1;phFrom=phTo;phTo=1;phT=phFrom===1?1:0;nextItem=480;star=0;starStages=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,2);nextStar=starStages.includes(1)?60*(12+Math.random()*30):Infinity;kills=0;ending=false;$('ov').classList.remove('end');updHud();
 }
 const SHEEP_SVG='<svg viewBox="0 0 24 18" class="sh" aria-hidden="true"><g fill="#fbfaf4"><circle cx="10" cy="8" r="5"/><circle cx="15" cy="7" r="5"/><circle cx="18" cy="10" r="4"/><circle cx="12" cy="11" r="5"/></g><ellipse cx="5" cy="8" rx="3.4" ry="4" fill="#3b3330"/><rect x="9" y="14" width="2" height="4" fill="#3b3330"/><rect x="15" y="14" width="2" height="4" fill="#3b3330"/><rect x="4" y="6" width="1.4" height="1.4" fill="#fff"/></svg>',WOLF_SVG='<svg viewBox="0 0 16 16" class="wf" aria-hidden="true"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg>';
 let _lv=-1,_lk=-1,_lf=-1;
@@ -122,7 +122,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
-  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);healDone=false;nextHeal=frame+60*(10+Math.random()*25);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
+  if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);healDone=!HEAL_STAGES.includes(level);nextHeal=frame+60*(10+Math.random()*25);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
 const FINAL=4,NEED=[15,20,25,30],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');Music.stop();bgm.pause();setTimeout(()=>{if(ending)playMusic()},1300);
@@ -132,7 +132,7 @@ function startEnding(){
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
 }
 let banner='',bannerT=0,nextItem=0;
-let healDone=false,nextHeal=Infinity;
+const HEAL_STAGES=[2,4];let healDone=false,nextHeal=Infinity;
 let co=null;const CO_TIME=100;
 function callout(title,sub,col,edge){co={title,sub,col,edge,t:CO_TIME}}
 function addScore(n){score+=n;
@@ -192,7 +192,7 @@ function step(){
   // 矢を射る
   if(sheep.cd>0)sheep.cd--;
   if(sheep.draw>0)sheep.draw--;
-  const maxA=power>0?4:1;
+  const maxA=power>0?3:1;
   if((keys[' ']||touchY!==null)&&arrows.length<maxA&&sheep.cd===0){
     arrows.push({x:SX+32,y:sheep.y-4});sheep.draw=8;sfx('shoot');sheep.cd=power>0?7:0;
   }
