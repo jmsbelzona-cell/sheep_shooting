@@ -150,6 +150,7 @@ function spawnRise(){
   wolves.push({x:CLIFF+70+Math.random()*(W-CLIFF-100),y:GROUND-14,vy:(.5+Math.random()*.3)*lv,ph:Math.random()*6.28,
     st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.45,.55,0]:level>=3?[.70,.30,0]:[1,0,0])});
 }
+const WS=.7; // オオカミの大きさ（元の70%）
 const KIND_COL={blue:'#4f8fe0',yellow:'#f2c230',red:'#e4574e'};
 function pickKind(p){const r=Math.random();return r<p[0]?'blue':r<p[0]+p[1]?'yellow':'red'}
 function throwAt(w){
@@ -240,9 +241,10 @@ function step(){
   for(const a of arrows){
     for(const w of wolves){
       if(a.dead||w.st==='fall')continue;
-      // 当たりはオオカミの体だけ（パラシュートや風船は素通り）
+      // パラシュート・風船も含めたオオカミ全体が当たり
       const cx=w.x,cy=w.y;
-      const onBody=Math.abs(a.x-w.x)<13&&Math.abs(a.y-w.y)<15;
+      const dx=Math.abs(a.x-w.x),dy=a.y-w.y;
+      const onBody=w.st==='chute'?(dx<16*WS*1.4&&dy>-56*WS&&dy<15*WS):(w.st==='rise'||w.st==='drift')?(dx<15*WS&&dy>-46*WS&&dy<15*WS):(dx<15*WS&&dy>-21*WS&&dy<15*WS);
       if(onBody){
         a.dead=1;sfx('hit');sfx('fall');const was=w.st;w.st='fall';w.fy=was==='rise'||was==='drift'?-1:0;w.vr=(Math.random()-.5)*.25;
         const pts=was==='landed'||was==='drift'?20:was==='rise'?20+10*Math.floor((GROUND-w.y)/100):10*(1+Math.floor((GROUND-w.y)/90));
@@ -444,7 +446,7 @@ function drawSheep(y){
 }
 
 function drawWolf(w){
-  ctx.save();ctx.translate(w.x,w.y);ctx.rotate(w.rot);
+  ctx.save();ctx.translate(w.x,w.y);ctx.rotate(w.rot);ctx.scale(WS,WS);
   if(w.st==='chute'){
     const cy=-34;
     ctx.strokeStyle='#555';ctx.lineWidth=1;
