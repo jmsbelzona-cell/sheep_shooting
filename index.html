@@ -210,7 +210,9 @@ function step(){
   // オオカミ
   const rate=Math.round(Math.max(40,100-(level-1)*17)*0.9); // 出る間隔-10%
   if(frame%rate===0)spawn();
-  if(level>=2&&frame%Math.round(Math.max(120,200-(level-2)*30)*0.9)===100)spawnRise();
+  // 下から来る間隔：ステージ2は2秒、3は1.5秒、4は1秒に1匹
+  const RI=[0,0,120,90,60][level]||60;
+  if(level>=2&&frame%RI===Math.floor(RI/2))spawnRise();
   // パワーアップの金のりんご
   const appleOut=items.some(it=>it.type==='apple');
   if(!appleOut&&nextItem===Infinity)nextItem=frame+60*(15+Math.random()*10);
