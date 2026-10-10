@@ -395,7 +395,8 @@ function bg(){
   const wx=BARN_X-16,wy=by-20,ww=22,wh=12;
   ctx.fillStyle=P.win>.3?`rgba(255,214,120,${.35+.6*P.win})`:'#3a2a20';ctx.fillRect(wx,wy,ww,wh);
   ctx.save();ctx.beginPath();ctx.rect(wx,wy,ww,wh);ctx.clip();
-  [0,1].forEach(i=>{
+  // エンディング中は子羊が小屋から出てきているので、窓には描かない
+  if(!ending)[0,1].forEach(i=>{
     const lx=wx+6+i*10,t=tick*.35+i*1.3;
     let oy=0,ox=0;
     if(lambFear>0){oy=6;ox=Math.sin(tick*1.7+i)*.8}
