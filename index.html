@@ -84,7 +84,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
       </div>
       <div class="lg"><span class="lgh">アイテム</span>
         <span><i class="dot" style="background:#ffcf5c"></i>りんご</span><span>しばらく連射できる</span>
-        <span><i class="star">★</i>星</span><span>5秒間むてき</span>
+        <span><i class="star">★</i>星</span><span>しばらく無敵になる</span>
         <span><i class="star" style="color:#ff6b8a">♥</i>ハート</span><span>体力が1回復</span>
       </div>
     </div>
@@ -129,6 +129,8 @@ function startEnding(){
   running=false;ending=true;endT=0;hearts=[];
   wolves.forEach(w=>puff(w.x,w.y,'#c9b08a',8));wolves=[];stones=[];items=[];arrows=[];power=0;bannerT=0;
   phFrom=phTo;phTo=1;phT=0;
+  // 残り体力1につき300点のボーナス
+  score+=Math.max(lives,0)*300;$('score').textContent=score;
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
 }
 let banner='',bannerT=0,nextItem=0;
