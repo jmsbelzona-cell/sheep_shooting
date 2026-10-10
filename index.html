@@ -47,6 +47,7 @@ canvas{display:block;height:100%;max-width:100%;aspect-ratio:3/4;background:var(
 .overlay h1{margin:0;font-size:30px;line-height:1.25;font-weight:400;color:var(--fg);text-shadow:0 3px 0 #6b4320;text-wrap:balance}
 .overlay .rules{display:flex;flex-direction:column;gap:10px;font-size:13px}
 .lg{display:grid;grid-template-columns:5.2em auto;gap:3px 12px;text-align:left;align-items:center}
+.ic{width:18px;height:18px;flex:none}
 .lgw{width:22px;height:22px;display:block}
 .lgh{grid-column:1/-1;color:var(--gold);font-size:12px;letter-spacing:.1em;border-bottom:1px solid rgba(255,207,92,.4);padding-bottom:2px;margin-bottom:2px}
 .lg span{display:flex;align-items:center;gap:6px}
@@ -75,10 +76,10 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
     <p id="msg" hidden></p>
     <div class="rules">
       <div class="lg"><span class="lgh"><svg viewBox="0 0 16 16" class="lgw" role="img" aria-label="オオカミ"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg></span>
-        <span><i class="dot" style="background:#4f8fe0"></i>青</span><span>おりてくるだけ</span>
-        <span><i class="dot" style="background:#f2c230"></i>黄</span><span>玉を1発うつ</span>
-        <span><i class="dot" style="background:#e4574e"></i>赤</span><span>玉を2発うつ</span>
-        <span><i class="dot bal"></i>風船</span><span>ステージ2から下から昇ってくる</span>
+        <span><svg viewBox="0 0 16 16" class="ic" aria-hidden="true"><path d="M1 7 A7 6 0 0 1 15 7 Z" fill="#4f8fe0"/><path d="M5.5 7 A2.6 6 0 0 1 10.5 7 Z" fill="#fff6e6"/><path d="M1.5 7 L8 13 M14.5 7 L8 13 M6 7 L8 13 M10 7 L8 13" stroke="#555" stroke-width=".7" fill="none"/><circle cx="8" cy="13.5" r="1.6" fill="#8a8c98"/></svg>青</span><span>おりてくるだけ</span>
+        <span><svg viewBox="0 0 16 16" class="ic" aria-hidden="true"><path d="M1 7 A7 6 0 0 1 15 7 Z" fill="#f2c230"/><path d="M5.5 7 A2.6 6 0 0 1 10.5 7 Z" fill="#fff6e6"/><path d="M1.5 7 L8 13 M14.5 7 L8 13 M6 7 L8 13 M10 7 L8 13" stroke="#555" stroke-width=".7" fill="none"/><circle cx="8" cy="13.5" r="1.6" fill="#8a8c98"/></svg>黄</span><span>玉を1発うつ</span>
+        <span><svg viewBox="0 0 16 16" class="ic" aria-hidden="true"><path d="M1 7 A7 6 0 0 1 15 7 Z" fill="#e4574e"/><path d="M5.5 7 A2.6 6 0 0 1 10.5 7 Z" fill="#fff6e6"/><path d="M1.5 7 L8 13 M14.5 7 L8 13 M6 7 L8 13 M10 7 L8 13" stroke="#555" stroke-width=".7" fill="none"/><circle cx="8" cy="13.5" r="1.6" fill="#8a8c98"/></svg>赤</span><span>玉を2発うつ</span>
+        <span><svg viewBox="0 0 16 16" class="ic" aria-hidden="true"><ellipse cx="5.5" cy="6" rx="4" ry="4.8" fill="#4f8fe0"/><ellipse cx="11" cy="6.5" rx="4" ry="4.8" fill="#f2c230"/><path d="M5.5 10.8 Q6.5 13 8 15 M11 11.3 Q9.5 13 8 15" stroke="#555" stroke-width=".7" fill="none"/></svg>風船</span><span>ステージ2から下から昇ってくる</span>
       </div>
       <div class="lg"><span class="lgh">アイテム</span>
         <span><i class="dot" style="background:#ffcf5c"></i>りんご</span><span>しばらく連射できる</span>
