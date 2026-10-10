@@ -149,7 +149,7 @@ function spawn(){
 function spawnRise(){
   const lv=(1+(level-2)*.15)*1.08; // 昇る速さ+8%
   wolves.push({x:CLIFF+70+Math.random()*(W-CLIFF-100),y:GROUND-14,vy:(.5+Math.random()*.3)*lv,ph:Math.random()*6.28,
-    st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.20,.80,0]:level>=3?[.50,.50,0]:[1,0,0])});
+    st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.30,.70,0]:level>=3?[.50,.50,0]:[1,0,0])});
 }
 const WS=.77; // オオカミの大きさ（元の77%）
 const PS=.825; // 羊とかごの大きさ（元の82.5%）
