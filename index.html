@@ -258,7 +258,7 @@ function step(){
       const onBody=w.st==='chute'?(dx<16*WS*1.4&&dy>-56*WS&&dy<15*WS):(w.st==='rise'||w.st==='drift')?(dx<15*WS&&dy>-46*WS&&dy<15*WS):(dx<15*WS&&dy>-21*WS&&dy<15*WS);
       if(onBody){
         a.dead=1;sfx('hit');sfx('fall');const was=w.st;w.st='fall';w.fy=was==='rise'||was==='drift'?-1:0;w.vr=(Math.random()-.5)*.25;
-        const pts=was==='landed'||was==='drift'?20:was==='rise'?20+10*Math.floor((GROUND-w.y)/100):10*(1+Math.floor((GROUND-w.y)/90));
+        const pts=was==='landed'||was==='drift'?20:was==='rise'?20+10*Math.min(3,Math.floor((w.y-RISE_LIMIT)/92)):10*(1+Math.floor((GROUND-w.y)/90));
         if(w.kind==='gold'){addScore(1000);popText(w.x,w.y-40,'+1000');sfx('power');lambJoy=90;for(let k=0;k<24;k++)parts.push({x:w.x,y:w.y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,l:40,c:'#ffd84a'})}
         else{kills++;addScore(pts);popText(w.x,w.y-40,'+'+pts);lambJoy=Math.max(lambJoy,40)}
         puff(cx,cy,KIND_COL[w.kind],14);
