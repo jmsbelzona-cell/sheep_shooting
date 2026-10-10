@@ -110,7 +110,7 @@ function reset(){
 }
 const SHEEP_SVG='<svg viewBox="0 0 24 18" class="sh" aria-hidden="true"><g fill="#fbfaf4"><circle cx="10" cy="8" r="5"/><circle cx="15" cy="7" r="5"/><circle cx="18" cy="10" r="4"/><circle cx="12" cy="11" r="5"/></g><ellipse cx="5" cy="8" rx="3.4" ry="4" fill="#3b3330"/><rect x="9" y="14" width="2" height="4" fill="#3b3330"/><rect x="15" y="14" width="2" height="4" fill="#3b3330"/><rect x="4" y="6" width="1.4" height="1.4" fill="#fff"/></svg>',WOLF_SVG='<svg viewBox="0 0 16 16" class="wf" aria-hidden="true"><path d="M3 7 L4 1 L7 5 L9 5 L12 1 L13 7 Z" fill="#8a8c98"/><circle cx="8" cy="9" r="5.5" fill="#8a8c98"/><ellipse cx="8" cy="11" rx="2.6" ry="2" fill="#e2dfd5"/><rect x="7" y="9.6" width="2" height="1.3" fill="#222"/><rect x="5" y="7" width="1.6" height="1.3" fill="#ffd23f"/><rect x="9.4" y="7" width="1.6" height="1.3" fill="#ffd23f"/></svg>';
 let _lv=-1,_lk=-1,_lf=-1;
-const START_HP=3,MAXHP=5,HEART_SVG='<svg viewBox="0 0 20 18" class="hp" aria-hidden="true"><path d="M10 17 C3 11 0 8 0 5 A5 5 0 0 1 10 3 A5 5 0 0 1 20 5 C20 8 17 11 10 17Z"/></svg>';
+const START_HP=3,MAXHP=4,HEART_SVG='<svg viewBox="0 0 20 18" class="hp" aria-hidden="true"><path d="M10 17 C3 11 0 8 0 5 A5 5 0 0 1 10 3 A5 5 0 0 1 20 5 C20 8 17 11 10 17Z"/></svg>';
 function renderLives(){const n=Math.max(lives,0);if(n===_lv)return;_lv=n;const e=$('livesIc');
   let h='';for(let i=0;i<MAXHP;i++)h+=HEART_SVG.replace('class="hp"',i<n?'class="hp on"':'class="hp"');
   e.innerHTML='<span class="hpl">体力</span>'+h;e.setAttribute('aria-label','体力 '+n)}
