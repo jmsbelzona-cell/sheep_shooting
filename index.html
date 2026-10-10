@@ -151,6 +151,7 @@ function spawnRise(){
     st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.45,.55,0]:level>=3?[.70,.30,0]:[1,0,0])});
 }
 const WS=.7; // オオカミの大きさ（元の70%）
+const PS=.75; // 羊とかごの大きさ（元の75%）
 const KIND_COL={blue:'#4f8fe0',yellow:'#f2c230',red:'#e4574e'};
 function pickKind(p){const r=Math.random();return r<p[0]?'blue':r<p[0]+p[1]?'yellow':'red'}
 function throwAt(w){
@@ -197,7 +198,7 @@ function step(){
   if(sheep.draw>0)sheep.draw--;
   const maxA=power>0?3:1;
   if((keys[' ']||touchY!==null)&&arrows.length<maxA&&sheep.cd===0){
-    arrows.push({x:SX+32,y:sheep.y-4});sheep.draw=8;sfx('shoot');sheep.cd=power>0?7:0;
+    arrows.push({x:SX+32*PS,y:sheep.y-4*PS});sheep.draw=8;sfx('shoot');sheep.cd=power>0?7:0;
   }
   if(power>0)power--;
   if(star>0){star--;if(frame%3===0)parts.push({x:SX+(Math.random()-.5)*36,y:sheep.y+(Math.random()-.5)*30,vx:(Math.random()-.5),vy:-.6-Math.random(),l:26,c:Math.random()<.5?'#fff3a0':'#ffcf5c'})}
@@ -264,7 +265,7 @@ function step(){
   if(co&&--co.t<=0)co=null;
   // 石の当たり判定
   for(const s of stones){s.x+=s.vx;s.y+=s.vy;
-    if(Math.abs(s.x-SX)<16&&Math.abs(s.y-sheep.y)<18){s.dead=1;hurt()}
+    if(Math.abs(s.x-SX)<16*PS&&Math.abs(s.y-sheep.y)<18*PS){s.dead=1;hurt()}
     for(const a of arrows)if(!a.dead&&Math.abs(a.x-s.x)<6&&Math.abs(a.y-s.y)<6){a.dead=1;s.dead=1;sfx('break');puff(s.x,s.y,'#9a948a',6);addScore(5)}
   }
   stones=stones.filter(s=>!s.dead&&s.x>0&&s.y<H&&s.y>-10);
@@ -418,10 +419,10 @@ function bg(){
 function nightTint(P){if(P.tintA>.005){ctx.fillStyle=rgb(P.tint,P.tintA);ctx.fillRect(0,0,W,H)}}
 
 function drawSheep(y){
-  ctx.save();ctx.translate(SX,0);ctx.scale(-1,1);
-  const x=0;
-  // 綱
-  ctx.strokeStyle='#e7d2a5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(4,56);ctx.lineTo(x,y-26);ctx.stroke();
+  // 綱（滑車からかごの吊り手まで）
+  ctx.strokeStyle='#e7d2a5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(SX-4,56);ctx.lineTo(SX,y-26*PS);ctx.stroke();
+  ctx.save();ctx.translate(SX,y);ctx.scale(-PS,PS);
+  const x=0;y=0;
   ctx.beginPath();ctx.moveTo(x-14,y-2);ctx.lineTo(x,y-26);ctx.lineTo(x+14,y-2);ctx.stroke();
   // 羊の体（もこもこ）
   ctx.fillStyle=star>0?(star<60&&frame%10<5?'#fbfaf4':`hsl(46,100%,${62+Math.sin(frame*.3)*10}%)`):'#fbfaf4';
