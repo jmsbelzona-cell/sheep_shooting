@@ -126,7 +126,7 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
   if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);healDone=!HEAL_STAGES.includes(level);nextHeal=frame+60*(10+Math.random()*25);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
-const FINAL=4,NEED=[20,30,40,50],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
+const FINAL=4,NEED=[20,30,35,45],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');Music.stop();bgm.pause();setTimeout(()=>{if(ending)playMusic()},1300);
   running=false;ending=true;endT=0;hearts=[];
