@@ -240,11 +240,10 @@ function step(){
   for(const a of arrows){
     for(const w of wolves){
       if(a.dead||w.st==='fall')continue;
-      let cx=w.x,cy=w.y-34,onTop=false;
-      if(w.st==='chute')onTop=Math.hypot(a.x-cx,a.y-cy)<22&&a.y<cy+6;
-      if(w.st==='rise'||w.st==='drift'){cy=w.y-32;onTop=Math.hypot(a.x-cx,a.y-cy)<13}
+      // 当たりはオオカミの体だけ（パラシュートや風船は素通り）
+      const cx=w.x,cy=w.y;
       const onBody=Math.abs(a.x-w.x)<13&&Math.abs(a.y-w.y)<15;
-      if(onTop||onBody){
+      if(onBody){
         a.dead=1;sfx('hit');sfx('fall');const was=w.st;w.st='fall';w.fy=was==='rise'||was==='drift'?-1:0;w.vr=(Math.random()-.5)*.25;
         const pts=was==='landed'||was==='drift'?20:was==='rise'?20+10*Math.floor((GROUND-w.y)/100):10*(1+Math.floor((GROUND-w.y)/90));
         kills++;addScore(pts);popText(w.x,w.y-40,'+'+pts);
@@ -252,7 +251,7 @@ function step(){
       }
     }
   }
-  for(const a of arrows)for(const it of items){if(!a.dead&&!it.dead&&Math.hypot(a.x-it.x,a.y-it.y)<14){
+  for(const a of arrows)for(const it of items){if(!a.dead&&!it.dead&&(Math.hypot(a.x-it.x,a.y-it.y)<14||(Math.hypot(a.x-it.x,a.y-(it.y-22))<14&&a.y<it.y-14)||(Math.abs(a.x-it.x)<10&&a.y>it.y-22&&a.y<it.y))){
     a.dead=1;it.dead=1;puff(it.x,it.y,'#ffcf5c',20);
     if(it.type==='heal'){sfx('life');puff(SX,sheep.y,'#ff8fa8',16);
       if(lives>=MAXHP){addScore(500);callout('+500','','#ffcf5c','#8a4b12')}else{lives++;updHud();callout('回復！','','#ffd0da','#c2304a')}}
