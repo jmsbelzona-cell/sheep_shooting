@@ -150,8 +150,8 @@ function spawnRise(){
   wolves.push({x:CLIFF+70+Math.random()*(W-CLIFF-100),y:GROUND-14,vy:(.5+Math.random()*.3)*lv,ph:Math.random()*6.28,
     st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.45,.55,0]:level>=3?[.70,.30,0]:[1,0,0])});
 }
-const WS=.7; // オオカミの大きさ（元の70%）
-const PS=.75; // 羊とかごの大きさ（元の75%）
+const WS=.77; // オオカミの大きさ（元の77%）
+const PS=.825; // 羊とかごの大きさ（元の82.5%）
 const KIND_COL={blue:'#4f8fe0',yellow:'#f2c230',red:'#e4574e'};
 function pickKind(p){const r=Math.random();return r<p[0]?'blue':r<p[0]+p[1]?'yellow':'red'}
 function throwAt(w){
