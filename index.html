@@ -137,7 +137,7 @@ function startEnding(){
   if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
 }
 let banner='',bannerT=0,nextItem=0;
-const HEAL_STAGES=[2,4];let healDone=false,nextHeal=Infinity;
+const HEAL_STAGES=[2,3,4];let healDone=false,nextHeal=Infinity;
 let co=null;const CO_TIME=100;
 function callout(title,sub,col,edge){co={title,sub,col,edge,t:CO_TIME}}
 function addScore(n){score+=n;
