@@ -58,6 +58,7 @@ canvas{display:block;height:100%;max-width:100%;aspect-ratio:3/4;background:var(
 .star{font-style:normal;color:#ffe066;font-size:12px;width:10px;text-align:center}
 .overlay p.oldrules{font-size:12px;color:var(--gold);line-height:1.7}
 .overlay p{margin:0;color:var(--fg);font-size:13px;line-height:1.8;text-wrap:pretty}
+.overlay #famPic{width:200px;height:144px;margin-bottom:-4px;background:none;border:0;border-radius:0;aspect-ratio:auto;max-width:100%}
 .overlay #bossPic{width:180px;height:140px;margin-bottom:-6px;background:none;border:0;border-radius:0;aspect-ratio:auto;max-width:100%}
 .cleared{font-size:20px;color:var(--gold);font-weight:700}
 .diff{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
@@ -82,6 +83,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
   <button type="button" class="gate" id="gate"><span class="gt">こひつじを<br>守れ！</span><span class="gs">タップしてスタート</span></button>
   <div class="overlay" id="ov">
     <canvas id="bossPic" width="320" height="250" role="img" aria-label="悪そうに笑うオオカミの親分" hidden></canvas>
+    <canvas id="famPic" width="360" height="260" role="img" aria-label="笑顔の羊の親子" hidden></canvas>
     <h1>こひつじを<br>守れ！</h1>
     <p id="msg" hidden></p>
     <div class="rules">
@@ -658,6 +660,7 @@ function endStep(){
     o.querySelector('h1').innerHTML='オオカミから<br>子どもたちを守った！';
     o.querySelector('.rules').hidden=true;$('msg').hidden=false;
     $('msg').innerHTML='<span class="cleared">'+(diff==='hard'?'あなたはマスター！':'レベルを上げて挑戦しよう！')+'</span>';
+    if(diff==='hard'){drawFamilyPortrait();$('famPic').hidden=false}
     showAfter()}
 }
 function sheepStand(x,y,k,hop,face){
@@ -788,6 +791,39 @@ $('gate').addEventListener('click',()=>{
 });
 $('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'ミュート中':'♪ 音あり';$('mute').setAttribute('aria-pressed',muted);if(muted){bgm.pause();Music.stop()}else playMusic()};
 
+
+/* ハードのエンディング：笑顔の羊の親子のアップ */
+function drawFamilyPortrait(){
+  const c=$('famPic'),g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.scale(2,2);
+  // うしろの光
+  const gl=g.createRadialGradient(90,66,10,90,66,64);gl.addColorStop(0,'rgba(255,214,120,.55)');gl.addColorStop(1,'rgba(255,214,120,0)');
+  g.fillStyle=gl;g.fillRect(0,0,180,130);
+  function sheep(x,y,k){
+    g.save();g.translate(x,y);g.scale(k,k);
+    // 耳
+    g.fillStyle='#3b3330';g.beginPath();g.ellipse(-27,-2,11,5.5,-.5,0,6.28);g.ellipse(27,-2,11,5.5,.5,0,6.28);g.fill();
+    // もこもこの毛（頭の上と体）
+    g.fillStyle='#fbfaf4';
+    [[-26,26,16],[0,30,20],[26,26,16],[-16,-24,12],[0,-30,13],[16,-24,12],[-8,-36,9],[8,-36,9]].forEach(([dx,dy,r])=>{g.beginPath();g.arc(dx,dy,r,0,6.28);g.fill()});
+    // 顔
+    g.fillStyle='#3b3330';g.beginPath();g.ellipse(0,0,20,25,0,0,6.28);g.fill();
+    // にっこり閉じた目
+    g.strokeStyle='#fff';g.lineWidth=2.6;g.lineCap='round';
+    g.beginPath();g.arc(-8,-4,5,Math.PI*1.15,Math.PI*1.85);g.stroke();
+    g.beginPath();g.arc(8,-4,5,Math.PI*1.15,Math.PI*1.85);g.stroke();
+    // ほっぺ
+    g.fillStyle='rgba(255,130,150,.75)';g.beginPath();g.ellipse(-13,7,4.5,3,0,0,6.28);g.ellipse(13,7,4.5,3,0,0,6.28);g.fill();
+    // 鼻と口（大きな笑顔）
+    g.fillStyle='#1f1a18';g.beginPath();g.ellipse(0,6,4,2.6,0,0,6.28);g.fill();
+    g.fillStyle='#ff8fa0';g.beginPath();g.moveTo(-8,11);g.quadraticCurveTo(0,22,8,11);g.closePath();g.fill();
+    g.strokeStyle='#fff';g.lineWidth=1.6;g.beginPath();g.moveTo(-8,11);g.quadraticCurveTo(0,22,8,11);g.stroke();
+    g.restore();
+  }
+  sheep(38,86,.72);sheep(142,86,.72);sheep(90,62,1);
+  // ハート
+  function heart(x,y,r,col){g.fillStyle=col;g.beginPath();g.moveTo(x,y+r*.9);g.bezierCurveTo(x-r*1.6,y-r*.2,x-r*.6,y-r*1.4,x,y-r*.4);g.bezierCurveTo(x+r*.6,y-r*1.4,x+r*1.6,y-r*.2,x,y+r*.9);g.fill()}
+  heart(28,30,7,'#ff7a9a');heart(154,26,8,'#ffcf5c');heart(132,48,5,'#ff7a9a');heart(48,52,5,'#ffcf5c');
+}
 /* ゲームオーバー画面：悪そうに笑うオオカミの親分（大きめの顔） */
 function drawBossPortrait(){
   const c=$('bossPic'),g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.scale(2,2);
@@ -834,10 +870,10 @@ function drawBossPortrait(){
   st(98,94,5);st(112,48,4);g.fill();
 }
 function showAfter(){$('diffSel').hidden=true;$('after').hidden=false;$('ov').hidden=false;$('retry').focus()}
-function showTop(){$('bossPic').hidden=true;reset();ending=false;running=false;const o=$('ov');o.classList.remove('end');
+function showTop(){$('bossPic').hidden=true;$('famPic').hidden=true;reset();ending=false;running=false;const o=$('ov');o.classList.remove('end');
   o.querySelector('h1').innerHTML='こひつじを<br>守れ！';o.querySelector('.rules').hidden=false;$('msg').hidden=true;
   $('after').hidden=true;$('diffSel').hidden=false;o.hidden=false;phFrom=phTo;phTo=1;phT=0;playMusic();$('start').focus()}
-function startGame(d){$('bossPic').hidden=true;$('after').hidden=true;$('diffSel').hidden=false;START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
+function startGame(d){$('bossPic').hidden=true;$('famPic').hidden=true;$('after').hidden=true;$('diffSel').hidden=false;START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
 $('retry').onclick=()=>startGame(diff);$('totop').onclick=showTop;
 $('easy').onclick=()=>startGame('easy');$('start').onclick=()=>startGame('normal');$('hard').onclick=()=>startGame('hard');
 // ブラウザの決まりで、最初に画面を触るかキーを押した時から鳴らし始める
