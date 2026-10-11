@@ -58,10 +58,12 @@ canvas{display:block;height:100%;max-width:100%;aspect-ratio:3/4;background:var(
 .star{font-style:normal;color:#ffe066;font-size:12px;width:10px;text-align:center}
 .overlay p.oldrules{font-size:12px;color:var(--gold);line-height:1.7}
 .overlay p{margin:0;color:var(--fg);font-size:13px;line-height:1.8;text-wrap:pretty}
+.cleared{font-size:20px;color:var(--gold);font-weight:700}
 .diff{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .dbtn{padding:10px 16px;font-size:17px;min-width:88px}
 #easy{background:#bfe3a8;box-shadow:0 3px 0 #6a9a50}
 #hard{background:#f2907a;box-shadow:0 3px 0 #a34a36}
+#totop{background:#fff6e6;box-shadow:0 3px 0 #a99a7a}
 button{font-family:var(--font);font-size:18px;color:#2b1d0e;background:var(--gold);border:0;padding:10px 28px;border-radius:3px;cursor:pointer;box-shadow:0 3px 0 #9a6b12}
 button:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
 .bgm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;font-size:12px;color:var(--muted);max-width:420px}
@@ -95,10 +97,14 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
         <span><i class="star" style="color:#ff6b8a">♥</i>ハート</span><span>体力が1回復</span>
       </div>
     </div>
-    <div class="diff" role="group" aria-label="難易度を選んではじめる">
+    <div class="diff" id="diffSel" role="group" aria-label="難易度を選んではじめる">
       <button type="button" id="easy" class="dbtn">イージー</button>
       <button type="button" id="start" class="dbtn">ノーマル</button>
       <button type="button" id="hard" class="dbtn">ハード</button>
+    </div>
+    <div class="diff" id="after" hidden>
+      <button type="button" id="retry" class="dbtn">もう一度挑戦する</button>
+      <button type="button" id="totop" class="dbtn">トップに戻る</button>
     </div>
   </div>
 </div>
@@ -204,8 +210,8 @@ function end(){
   running=false;
   if(score>best){best=score;try{localStorage.setItem(bestKey(),best)}catch(e){}$('best').textContent=best}
   $('ov').querySelector('h1').innerHTML='子どもたちは<br>食べられてしまった…';
-  $('ov').querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='得点 '+score+'<br>もう一度挑戦しますか？';
-  $('ov').hidden=false;$('start').focus();
+  $('ov').querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='得点 '+score;
+  showAfter();
 }
 
 function step(){
@@ -599,8 +605,9 @@ function endStep(){
   hearts.forEach(h=>{h.y-=h.vy;h.ph+=.05;h.l--});hearts=hearts.filter(h=>h.l>0);
   if(endT===200){const o=$('ov');o.classList.add('end');
     o.querySelector('h1').innerHTML='オオカミから<br>子どもたちを守った！';
-    o.querySelector('.rules').hidden=true;$('msg').hidden=true;
-    o.hidden=false;$('start').focus()}
+    o.querySelector('.rules').hidden=true;$('msg').hidden=false;
+    $('msg').innerHTML='<span class="cleared">'+(diff==='hard'?'あなたはマスター！':'レベルを上げて挑戦しよう！')+'</span>';
+    showAfter()}
 }
 function sheepStand(x,y,k,hop,face){
   ctx.save();ctx.translate(x,y-hop);ctx.scale(k*face,k);
@@ -729,14 +736,19 @@ $('gate').addEventListener('click',()=>{
   $('gate').hidden=true;$('ov').hidden=false;playMusic();$('start').focus();
 });
 $('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'ミュート中':'♪ 音あり';$('mute').setAttribute('aria-pressed',muted);if(muted){bgm.pause();Music.stop()}else playMusic()};
-function startGame(d){START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
+function showAfter(){$('diffSel').hidden=true;$('after').hidden=false;$('ov').hidden=false;$('retry').focus()}
+function showTop(){reset();ending=false;running=false;const o=$('ov');o.classList.remove('end');
+  o.querySelector('h1').innerHTML='こひつじを<br>守れ！';o.querySelector('.rules').hidden=false;$('msg').hidden=true;
+  $('after').hidden=true;$('diffSel').hidden=false;o.hidden=false;phFrom=phTo;phTo=1;phT=0;playMusic();$('start').focus()}
+function startGame(d){$('after').hidden=true;$('diffSel').hidden=false;START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
+$('retry').onclick=()=>startGame(diff);$('totop').onclick=showTop;
 $('easy').onclick=()=>startGame('easy');$('start').onclick=()=>startGame('normal');$('hard').onclick=()=>startGame('hard');
 // ブラウザの決まりで、最初に画面を触るかキーを押した時から鳴らし始める
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>playMusic(),{once:true}));
 addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;
   if([' ','ArrowUp','ArrowDown'].includes(k))e.preventDefault();
   if((k===' '||k==='Enter')&&!$('gate').hidden){if(document.activeElement!==$('gate'))$('gate').click();return}
-  if((k===' '||k==='Enter')&&!running&&!ending&&!document.activeElement.classList.contains('dbtn'))$('start').click()});
+  if((k===' '||k==='Enter')&&!running&&!document.activeElement.classList.contains('dbtn')){if(!$('after').hidden)$('retry').click();else if(!ending)$('start').click()}});
 addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
 function ty(e){const r=cv.getBoundingClientRect(),t=e.touches[0];return (t.clientY-r.top)/r.height*H}
 // 指を置いた位置ではなく、指を動かした分だけ籠が動く
