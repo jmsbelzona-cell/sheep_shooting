@@ -72,7 +72,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
 
 </head>
 <body>
-<div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>ステージ <b id="lv">1</b></span></div>
+<div class="hud"><span>得点 <b id="score">0</b></span><span>最高 <b id="best">0</b></span><span>難易度 <b id="df">ノーマル</b></span><span>ステージ <b id="lv">1</b></span></div>
 <div class="hud2"><span class="icons" id="livesIc" role="img" aria-label="体力 3"></span><span class="icons wolves" id="leftIc" role="img" aria-label="あと15匹"></span></div>
 <div class="wrap">
   <canvas id="c" width="360" height="480" aria-label="ゲーム画面"></canvas>
@@ -109,7 +109,9 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
 const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
 const $=id=>document.getElementById(id);
 const GROUND=H-36, CLIFF=50, SX=52, TOP=70, BOTTOM=GROUND-16, RISE_LIMIT=62;
-let best=0;try{best=+localStorage.getItem('sheepBest')||0}catch(e){}
+let best=0;function bestKey(){return diff==='normal'?'sheepBest':'sheepBest_'+diff}
+function loadBest(){best=0;try{best=+localStorage.getItem(bestKey())||0}catch(e){}$('best').textContent=best}
+try{best=+localStorage.getItem('sheepBest')||0}catch(e){}
 $('best').textContent=best;
 
 let sheep,arrows,wolves,stones,items,parts,texts,score,lives,frame,running=false,keys={},touchY=null,inv=0,power=0,level=1;
@@ -134,31 +136,38 @@ function updHud(){$('score').textContent=score;renderLives();$('lv').textContent
   renderLeft(Math.min(nl,FINAL));
   if(nl>=FINAL+1&&running){startEnding();return}
   if(nl>level){level=nl;$('lv').textContent=level;banner='ステージ'+level;bannerT=150;sfx('stage');setPhase(level);healDone=!HEAL_STAGES.includes(level);nextHeal=frame+60*(10+Math.random()*25);nextStar=starStages.includes(level)?frame+60*(8+Math.random()*30):Infinity}}
-const FINAL=4,NEED=[15,25,35,50],GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
+const FINAL=4;
+// 難易度ごとの設定（体力以外）：出る間隔・速さ・玉・倒す数・回復の出るステージ・得点倍率
+const DIFF={
+  easy:  {name:'イージー',spawn:1.3,speed:.8, throwInt:1.5,stoneV:.8, need:[12,20,28,40],heal:[1,2,3,4],score:.5},
+  normal:{name:'ノーマル',spawn:1,  speed:1,  throwInt:1,  stoneV:1,  need:[15,25,35,50],heal:[2,3,4],  score:1},
+  hard:  {name:'ハード',  spawn:.8, speed:1.2,throwInt:.7, stoneV:1.2,need:[15,25,35,50],heal:[3,4],    score:1.5}};
+let diff='normal',D=DIFF.normal;
+let NEED=D.need.slice(),GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));let kills=0;let ending=false,endT=0,hearts=[];
 function startEnding(){
   sfx('clear');Music.stop();bgm.pause();setTimeout(()=>{if(ending)playMusic()},1300);
   running=false;ending=true;endT=0;hearts=[];
   wolves.forEach(w=>puff(w.x,w.y,'#c9b08a',8));wolves=[];stones=[];items=[];arrows=[];power=0;bannerT=0;
   phFrom=phTo;phTo=1;phT=0;
   // 残り体力1につき300点のボーナス
-  score+=Math.max(lives,0)*300;$('score').textContent=score;
-  if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
+  score+=Math.round(Math.max(lives,0)*300*D.score);$('score').textContent=score;
+  if(score>best){best=score;try{localStorage.setItem(bestKey(),best)}catch(e){}$('best').textContent=best}
 }
 let banner='',bannerT=0,nextItem=0;
-const HEAL_STAGES=[2,3,4];let healDone=false,nextHeal=Infinity;
+let HEAL_STAGES=D.heal;let healDone=false,nextHeal=Infinity;
 let co=null;const CO_TIME=100;
 function callout(title,sub,col,edge){co={title,sub,col,edge,t:CO_TIME}}
-function addScore(n){score+=n;
+function addScore(n){score+=Math.round(n*D.score);
   updHud()}
 
 function spawn(){
   const lv=(1+(level-1)*.4)*1.08; // 少し難しく：降りる速さ+8%
-  wolves.push({x:CLIFF+60+Math.random()*(W-CLIFF-84),y:-30,vy:(.45+Math.random()*.35)*lv,ph:Math.random()*6.28,
+  wolves.push({x:CLIFF+60+Math.random()*(W-CLIFF-84),y:-30,vy:(.45+Math.random()*.35)*lv*D.speed,ph:Math.random()*6.28,
     st:'chute',rot:0,vr:0,fy:0,throwCd:60+Math.random()*120,shots:0,burst:0,kind:pickKind([[.80,.20,0],[.55,.35,.10],[.20,.60,.20],[.20,.50,.30]][level-1]||[.20,.50,.30])});
 }
 function spawnRise(){
   const lv=(1+(level-2)*.15)*1.08; // 昇る速さ+8%
-  wolves.push({x:CLIFF+70+Math.random()*(W-CLIFF-100),y:GROUND-14,vy:(.5+Math.random()*.3)*lv,ph:Math.random()*6.28,
+  wolves.push({x:CLIFF+70+Math.random()*(W-CLIFF-100),y:GROUND-14,vy:(.5+Math.random()*.3)*lv*D.speed,ph:Math.random()*6.28,
     st:'rise',rot:0,vr:0,fy:0,throwCd:60+Math.random()*100,shots:0,burst:0,kind:pickKind(level>=4?[.30,.70,0]:level>=3?[.50,.50,0]:[1,0,0])});
 }
 const WS=.77; // オオカミの大きさ（元の77%）
@@ -170,9 +179,9 @@ function spawnGold(){wolves.push({x:CLIFF+80+Math.random()*(W-CLIFF-120),y:GROUN
 function pickKind(p){const r=Math.random();return r<p[0]?'blue':r<p[0]+p[1]?'yellow':'red'}
 function throwAt(w){
   if(w.kind==='blue'||w.kind==='gold')return;
-  if(w.shots===0&&--w.throwCd<=0&&w.y>40&&w.y<GROUND-60){w.throwCd=(180+Math.random()*220)/(1+(level-1)*.2);w.shots=w.kind==='red'?2:1;w.burst=0}
+  if(w.shots===0&&--w.throwCd<=0&&w.y>40&&w.y<GROUND-60){w.throwCd=(180+Math.random()*220)/(1+(level-1)*.2)*D.throwInt;w.shots=w.kind==='red'?2:1;w.burst=0}
   if(w.shots>0&&--w.burst<=0){w.shots--;w.burst=14;
-    const dx=SX-w.x,dy=sheep.y-w.y,d=Math.hypot(dx,dy),v=2.6+(level-1)*.33;
+    const dx=SX-w.x,dy=sheep.y-w.y,d=Math.hypot(dx,dy),v=(2.6+(level-1)*.33)*D.stoneV;
     stones.push({x:w.x-10,y:w.y,vx:dx/d*v,vy:dy/d*v});sfx('stone')}
 }
 function puff(x,y,c,n=12){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*2.5+.8;
@@ -193,7 +202,7 @@ function hurt(mx,my){
 function end(){
   if(ending)return;Music.stop();bgm.pause();setTimeout(()=>{if(!running&&!ending)playMusic()},1200);bannerT=0;co=null;sfx('over');
   running=false;
-  if(score>best){best=score;try{localStorage.setItem('sheepBest',best)}catch(e){}$('best').textContent=best}
+  if(score>best){best=score;try{localStorage.setItem(bestKey(),best)}catch(e){}$('best').textContent=best}
   $('ov').querySelector('h1').innerHTML='子どもたちは<br>食べられてしまった…';
   $('ov').querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='得点 '+score+'<br>もう一度挑戦しますか？';
   $('ov').hidden=false;$('start').focus();
@@ -218,10 +227,10 @@ function step(){
   if(star>0){star--;if(frame%3===0)parts.push({x:SX+(Math.random()-.5)*36,y:sheep.y+(Math.random()-.5)*30,vx:(Math.random()-.5),vy:-.6-Math.random(),l:26,c:Math.random()<.5?'#fff3a0':'#ffcf5c'})}
   arrows.forEach(a=>a.x+=8);arrows=arrows.filter(a=>a.x<W+20);
   // オオカミ
-  const rate=Math.round(Math.max(40,100-(level-1)*17)*0.9); // 出る間隔-10%
+  const rate=Math.round(Math.max(40,100-(level-1)*17)*0.9*D.spawn); // 出る間隔-10%
   if(frame%rate===0)spawn();
   // 下から来る間隔：ステージ2は2秒、3は1.5秒、4は1秒に1匹
-  const RI=[0,0,120,90,60][level]||60;
+  const RI=Math.round(([0,0,120,90,60][level]||60)*D.spawn);
   if(level>=2&&frame%RI===Math.floor(RI/2))spawnRise();
   // パワーアップの金のりんご
   const appleOut=items.some(it=>it.type==='apple');
@@ -239,7 +248,7 @@ function step(){
     if(w.st==='chute'){
       w.ph+=.03;w.y+=w.vy;w.x+=Math.sin(w.ph)*.5;
       throwAt(w);
-      if(w.y>=GROUND-14){w.st='landed';w.y=GROUND-14;sfx('thud');w.walk=.45+(level-1)*.08;}
+      if(w.y>=GROUND-14){w.st='landed';w.y=GROUND-14;sfx('thud');w.walk=(.45+(level-1)*.08)*D.speed;}
     }else if(w.st==='fall'){
       w.fy+=.35;w.y+=w.fy;w.rot+=w.vr;
       if(w.y>GROUND){w.dead=1;puff(w.x,GROUND-4,'#c9b08a',10)}
@@ -250,7 +259,7 @@ function step(){
       w.ph+=.04;w.y-=w.vy;w.x+=Math.sin(w.ph)*.4;throwAt(w);
       if(w.kind==='gold'){if(frame%3===0)parts.push({x:w.x+(Math.random()-.5)*12,y:w.y,vx:0,vy:.6,l:22,c:'#fff3a0'});
         if(w.y<=RISE_LIMIT){w.st='escape'}}
-      else if(w.y<=RISE_LIMIT){w.st='drift';w.y=RISE_LIMIT;w.drift=.3+(level-2)*.06;}
+      else if(w.y<=RISE_LIMIT){w.st='drift';w.y=RISE_LIMIT;w.drift=(.3+(level-2)*.06)*D.speed;}
     }else if(w.st==='escape'){
       // 金のオオカミは上まで昇ると逃げていく（ミスにはならない）
       w.y-=3.5;if(w.y<-80)w.dead=1;
@@ -720,7 +729,7 @@ $('gate').addEventListener('click',()=>{
   $('gate').hidden=true;$('ov').hidden=false;playMusic();$('start').focus();
 });
 $('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'ミュート中':'♪ 音あり';$('mute').setAttribute('aria-pressed',muted);if(muted){bgm.pause();Music.stop()}else playMusic()};
-function startGame(d){START_HP=DIFF_HP[d];reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
+function startGame(d){START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
 $('easy').onclick=()=>startGame('easy');$('start').onclick=()=>startGame('normal');$('hard').onclick=()=>startGame('hard');
 // ブラウザの決まりで、最初に画面を触るかキーを押した時から鳴らし始める
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>playMusic(),{once:true}));
