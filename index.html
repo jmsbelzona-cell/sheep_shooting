@@ -58,6 +58,7 @@ canvas{display:block;height:100%;max-width:100%;aspect-ratio:3/4;background:var(
 .star{font-style:normal;color:#ffe066;font-size:12px;width:10px;text-align:center}
 .overlay p.oldrules{font-size:12px;color:var(--gold);line-height:1.7}
 .overlay p{margin:0;color:var(--fg);font-size:13px;line-height:1.8;text-wrap:pretty}
+.overlay #bossPic{width:180px;height:140px;margin-bottom:-6px;background:none;border:0;border-radius:0;aspect-ratio:auto;max-width:100%}
 .cleared{font-size:20px;color:var(--gold);font-weight:700}
 .diff{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .dbtn{padding:10px 16px;font-size:17px;min-width:88px}
@@ -80,6 +81,7 @@ button.small{font-size:12px;padding:4px 10px;box-shadow:none}
   <canvas id="c" width="360" height="480" aria-label="ゲーム画面"></canvas>
   <button type="button" class="gate" id="gate"><span class="gt">こひつじを<br>守れ！</span><span class="gs">タップしてスタート</span></button>
   <div class="overlay" id="ov">
+    <canvas id="bossPic" width="320" height="250" role="img" aria-label="悪そうに笑うオオカミの親分" hidden></canvas>
     <h1>こひつじを<br>守れ！</h1>
     <p id="msg" hidden></p>
     <div class="rules">
@@ -211,6 +213,7 @@ function end(){
   if(score>best){best=score;try{localStorage.setItem(bestKey(),best)}catch(e){}$('best').textContent=best}
   $('ov').querySelector('h1').innerHTML='子どもたちは<br>食べられてしまった…';
   $('ov').querySelector('.rules').hidden=true;$('msg').hidden=false;$('msg').innerHTML='得点 '+score;
+  drawBossPortrait();$('bossPic').hidden=false;
   showAfter();
 }
 
@@ -784,11 +787,57 @@ $('gate').addEventListener('click',()=>{
   $('gate').hidden=true;$('ov').hidden=false;playMusic();$('start').focus();
 });
 $('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'ミュート中':'♪ 音あり';$('mute').setAttribute('aria-pressed',muted);if(muted){bgm.pause();Music.stop()}else playMusic()};
+
+/* ゲームオーバー画面：悪そうに笑うオオカミの親分（大きめの顔） */
+function drawBossPortrait(){
+  const c=$('bossPic'),g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.scale(2,2);
+  const fur='#3e404c',fur2='#2c2e38';
+  // マント（肩）
+  g.fillStyle='#c0392b';g.beginPath();g.moveTo(22,125);g.quadraticCurveTo(80,82,138,125);g.closePath();g.fill();
+  g.fillStyle='#8f2a20';g.beginPath();g.moveTo(68,98);g.lineTo(80,112);g.lineTo(92,98);g.closePath();g.fill();
+  // 耳
+  g.fillStyle=fur;g.beginPath();g.moveTo(40,48);g.lineTo(36,6);g.lineTo(64,34);g.closePath();g.fill();
+  g.beginPath();g.moveTo(120,48);g.lineTo(124,6);g.lineTo(96,34);g.closePath();g.fill();
+  g.fillStyle='#6b4d4d';g.beginPath();g.moveTo(44,40);g.lineTo(41,16);g.lineTo(58,34);g.closePath();g.fill();
+  g.beginPath();g.moveTo(116,40);g.lineTo(119,16);g.lineTo(102,34);g.closePath();g.fill();
+  // 顔
+  g.fillStyle=fur;g.beginPath();g.ellipse(80,62,44,40,0,0,6.28);g.fill();
+  // ほおの毛
+  g.beginPath();g.moveTo(38,70);g.lineTo(28,82);g.lineTo(44,80);g.lineTo(36,92);g.lineTo(52,86);g.closePath();g.fill();
+  g.beginPath();g.moveTo(122,70);g.lineTo(132,82);g.lineTo(116,80);g.lineTo(124,92);g.lineTo(108,86);g.closePath();g.fill();
+  // 口のまわり
+  g.fillStyle='#d9d6cc';g.beginPath();g.ellipse(80,80,24,17,0,0,6.28);g.fill();
+  // 目（細めてにやり）
+  g.fillStyle='#ffd23f';
+  g.beginPath();g.moveTo(52,54);g.quadraticCurveTo(62,46,72,54);g.quadraticCurveTo(62,58,52,54);g.fill();
+  g.beginPath();g.moveTo(88,54);g.quadraticCurveTo(98,46,108,54);g.quadraticCurveTo(98,58,88,54);g.fill();
+  g.fillStyle='#111';g.fillRect(63,50,4,5);g.fillRect(99,50,4,5);
+  // 吊り上がった眉
+  g.strokeStyle=fur2;g.lineWidth=5;g.lineCap='round';
+  g.beginPath();g.moveTo(48,42);g.lineTo(72,50);g.stroke();
+  g.beginPath();g.moveTo(112,42);g.lineTo(88,50);g.stroke();
+  // 古傷
+  g.strokeStyle='#e6e1d3';g.lineWidth=2;g.beginPath();g.moveTo(96,36);g.lineTo(110,64);g.stroke();
+  g.beginPath();g.moveTo(101,46);g.lineTo(107,44);g.moveTo(104,53);g.lineTo(110,51);g.stroke();
+  // 鼻
+  g.fillStyle='#111';g.beginPath();g.ellipse(80,68,8,5.5,0,0,6.28);g.fill();
+  // にやりと笑う口（片側が上がる）
+  g.fillStyle='#5a1414';g.beginPath();g.moveTo(62,82);g.quadraticCurveTo(80,96,102,78);g.quadraticCurveTo(84,88,62,82);g.fill();
+  g.strokeStyle='#111';g.lineWidth=2.4;g.beginPath();g.moveTo(60,80);g.quadraticCurveTo(80,97,104,76);g.stroke();
+  // 牙
+  g.fillStyle='#fffaf0';
+  g.beginPath();g.moveTo(68,85);g.lineTo(71,94);g.lineTo(74,87);g.closePath();g.fill();
+  g.beginPath();g.moveTo(92,84);g.lineTo(95,93);g.lineTo(97,82);g.closePath();g.fill();
+  // ぎらりと光る
+  g.fillStyle='#fff';g.beginPath();
+  const st=(x,y,r)=>{g.moveTo(x,y-r);g.lineTo(x+r*.25,y-r*.25);g.lineTo(x+r,y);g.lineTo(x+r*.25,y+r*.25);g.lineTo(x,y+r);g.lineTo(x-r*.25,y+r*.25);g.lineTo(x-r,y);g.lineTo(x-r*.25,y-r*.25);g.closePath()};
+  st(98,94,5);st(112,48,4);g.fill();
+}
 function showAfter(){$('diffSel').hidden=true;$('after').hidden=false;$('ov').hidden=false;$('retry').focus()}
-function showTop(){reset();ending=false;running=false;const o=$('ov');o.classList.remove('end');
+function showTop(){$('bossPic').hidden=true;reset();ending=false;running=false;const o=$('ov');o.classList.remove('end');
   o.querySelector('h1').innerHTML='こひつじを<br>守れ！';o.querySelector('.rules').hidden=false;$('msg').hidden=true;
   $('after').hidden=true;$('diffSel').hidden=false;o.hidden=false;phFrom=phTo;phTo=1;phT=0;playMusic();$('start').focus()}
-function startGame(d){$('after').hidden=true;$('diffSel').hidden=false;START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
+function startGame(d){$('bossPic').hidden=true;$('after').hidden=true;$('diffSel').hidden=false;START_HP=DIFF_HP[d];diff=d;D=DIFF[d];NEED=D.need.slice();GOAL=NEED.map((n,i)=>NEED.slice(0,i+1).reduce((a,b)=>a+b));HEAL_STAGES=D.heal;_lf=-1;loadBest();$('df').textContent=D.name;reset();$('ov').hidden=true;running=true;banner='ステージ1';bannerT=150;playMusic()}
 $('retry').onclick=()=>startGame(diff);$('totop').onclick=showTop;
 $('easy').onclick=()=>startGame('easy');$('start').onclick=()=>startGame('normal');$('hard').onclick=()=>startGame('hard');
 // ブラウザの決まりで、最初に画面を触るかキーを押した時から鳴らし始める
