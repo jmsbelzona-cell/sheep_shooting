@@ -538,7 +538,7 @@ function drawBoss(){
   if(raise){ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(13,-9);ctx.lineTo(19,-9);ctx.lineTo(16,-6);ctx.fill()} // 吠える口
   ctx.restore();
   // ふきだし
-  if(bossTalk>0&&bossLine){
+  if(false&&bossTalk>0&&bossLine){ // ふきだしは表示しない（腕の号令だけ）
     const a=Math.min(1,bossTalk/15);ctx.globalAlpha=a;
     ctx.font='bold 11px "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", sans-serif';
     const w=ctx.measureText(bossLine).width+14,bx=36,by=4;
