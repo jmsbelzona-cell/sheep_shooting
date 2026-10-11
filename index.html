@@ -166,7 +166,7 @@ function callout(title,sub,col,edge){co={title,sub,col,edge,t:CO_TIME}}
 function addScore(n){score+=Math.round(n*D.score);
   updHud()}
 
-function spawn(){
+function spawn(){bossCommand();
   const lv=(1+(level-1)*.4)*1.08; // 少し難しく：降りる速さ+8%
   wolves.push({x:CLIFF+60+Math.random()*(W-CLIFF-84),y:-30,vy:(.45+Math.random()*.35)*lv*D.speed,ph:Math.random()*6.28,
     st:'chute',rot:0,vr:0,fy:0,throwCd:60+Math.random()*120,shots:0,burst:0,kind:pickKind([[.80,.20,0],[.55,.35,.10],[.20,.60,.20],[.20,.50,.30]][level-1]||[.20,.50,.30])});
@@ -298,6 +298,7 @@ function step(){
       if(lives>=MAXHP){addScore(500);callout('+500','','#ffcf5c','#8a4b12')}else{lives++;updHud();callout('回復！','','#ffd0da','#c2304a')}}
     else if(it.type==='star'){star=STAR_TIME;sfx('star');callout('無敵！','','#fff3a0','#b8860b')}else{power=POWER_TIME;sfx('power');callout('連射！','','#ffcf5c','#8a4b12')}}}
   items=items.filter(it=>!it.dead);
+  bossUpdate();
   if(bannerT>0)bannerT--;
   if(flash>0)flash--;if(lambJoy>0)lambJoy--;if(lambFear>0)lambFear--;marks.forEach(m=>m.t--);marks=marks.filter(m=>m.t>0);
   if(co&&--co.t<=0)co=null;
@@ -501,6 +502,52 @@ function drawSheep(y){
   ctx.restore();
 }
 
+
+/* ---------- オオカミの親分（崖のてっぺんで号令をかける） ---------- */
+let bossArm=0,bossTalk=0,bossLine='',nextTalk=180;
+const BOSS_LINES=['かかれー！','いけいけー！','子羊をねらえ！','ひるむなー！'];
+function bossCommand(){bossArm=24}
+function bossUpdate(){
+  if(bossArm>0)bossArm--;if(bossTalk>0)bossTalk--;
+  if(running&&--nextTalk<=0){bossLine=BOSS_LINES[Math.floor(Math.random()*BOSS_LINES.length)];bossTalk=110;bossArm=40;nextTalk=60*(5+Math.random()*4)}
+}
+function drawBoss(){
+  const x=19,y=26,raise=bossArm>0;
+  ctx.save();ctx.translate(x,y);ctx.scale(.72,.72);
+  const fur='#3e404c',fur2='#2c2e38';
+  // 尾
+  ctx.fillStyle=fur;ctx.beginPath();ctx.moveTo(-8,6);ctx.quadraticCurveTo(-22,4,-20,-8);ctx.lineTo(-14,2);ctx.fill();
+  // 体（どっしり座る）
+  ctx.beginPath();ctx.ellipse(0,0,12,13,0,0,6.28);ctx.fill();
+  ctx.fillStyle=fur2;ctx.fillRect(-9,9,6,6);ctx.fillRect(3,9,6,6);
+  // 赤いマント
+  ctx.fillStyle='#c0392b';ctx.beginPath();ctx.moveTo(-11,-8);ctx.lineTo(11,-8);ctx.lineTo(8,4);ctx.lineTo(-13,8);ctx.closePath();ctx.fill();
+  // 腕（号令のときは前へ突き出す）
+  ctx.strokeStyle=fur;ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();
+  if(raise){ctx.moveTo(6,-6);ctx.lineTo(20,-14+Math.sin(frame*.6)*2)}else{ctx.moveTo(6,-4);ctx.lineTo(10,6)}
+  ctx.stroke();
+  // 頭（右向き）
+  ctx.fillStyle=fur;ctx.beginPath();ctx.arc(4,-16,9,0,6.28);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-2,-22);ctx.lineTo(-1,-33);ctx.lineTo(4,-24);ctx.fill();
+  ctx.beginPath();ctx.moveTo(5,-24);ctx.lineTo(9,-34);ctx.lineTo(11,-22);ctx.fill();
+  ctx.beginPath();ctx.ellipse(12,-13,6,4,0,0,6.28);ctx.fill(); // 鼻先
+  ctx.fillStyle='#d9d6cc';ctx.beginPath();ctx.ellipse(12,-11,4,2.4,0,0,6.28);ctx.fill();
+  ctx.fillStyle='#111';ctx.fillRect(16,-15,3,3);
+  ctx.fillStyle='#ffd23f';ctx.fillRect(6,-19,3,2);
+  ctx.strokeStyle='#e6e1d3';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(4,-22);ctx.lineTo(9,-16);ctx.stroke(); // 古傷
+  if(raise){ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(13,-9);ctx.lineTo(19,-9);ctx.lineTo(16,-6);ctx.fill()} // 吠える口
+  ctx.restore();
+  // ふきだし
+  if(bossTalk>0&&bossLine){
+    const a=Math.min(1,bossTalk/15);ctx.globalAlpha=a;
+    ctx.font='bold 11px "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", sans-serif';
+    const w=ctx.measureText(bossLine).width+14,bx=36,by=4;
+    ctx.fillStyle='#fff6e6';ctx.strokeStyle='#5a3d20';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(bx,by,w,18,6);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(bx+6,by+18);ctx.lineTo(bx-2,by+22);ctx.lineTo(bx+12,by+18);ctx.fillStyle='#fff6e6';ctx.fill();
+    ctx.fillStyle='#8b1e14';ctx.textAlign='left';ctx.fillText(bossLine,bx+7,by+13);ctx.globalAlpha=1;
+  }
+}
 function drawWolf(w){
   ctx.save();ctx.translate(w.x,w.y);ctx.rotate(w.rot);ctx.scale(WS,WS);
   if(w.st==='chute'){
@@ -543,6 +590,7 @@ function draw(){
   const P=bg();
   if(!sheep)return;
   if(ending){drawEnding();nightTint(P);parts.forEach(p=>{ctx.globalAlpha=p.l/30;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,3,3)});ctx.globalAlpha=1;return}
+  drawBoss();
   wolves.forEach(drawWolf);
   // 矢
   arrows.forEach(a=>{ctx.strokeStyle='#5a3d20';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x-20,a.y);ctx.stroke();
