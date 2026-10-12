@@ -20,7 +20,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;
   display:flex;flex-direction:column;align-items:center;padding-block:12px;padding-inline:16px;box-sizing:border-box;gap:8px;
   -webkit-user-select:none;user-select:none;touch-action:none}
 .hud{width:100%;max-width:420px;display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:space-between;font-size:13px;letter-spacing:.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
-.hud2{width:100%;max-width:420px;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;align-items:center;min-height:20px}
+.hud2{width:100%;max-width:420px;display:flex;flex-wrap:nowrap;gap:12px;justify-content:space-between;align-items:center;height:26px}
+.icons .wf.big{width:22px;height:22px}
+.icons .cnt{font-size:18px;color:var(--gold);font-variant-numeric:tabular-nums;margin-left:2px;min-width:3ch}
 .shake{animation:shake .4s}
 @keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}}
@@ -138,9 +140,10 @@ function renderLives(){const n=Math.max(lives,0);if(n===_lv)return;_lv=n;const e
   let h='';for(let i=0;i<MAXHP;i++)h+=HEART_SVG.replace('class="hp"',i<n?'class="hp on"':'class="hp"');
   e.innerHTML='<span class="hpl">体力</span>'+h;e.setAttribute('aria-label','体力 '+n)}
 function renderLeft(st){const need=NEED[st-1],got=Math.min(need,kills-(st>1?GOAL[st-2]:0)),e=$('leftIc');
-  if(need===_lf&&got===_lk)return;
-  if(need!==_lf){e.innerHTML=WOLF_SVG.repeat(need);_lf=need;e.classList.toggle('many',need>30)}
-  [...e.children].forEach((c,i)=>c.classList.toggle('done',i<got));_lk=got;e.setAttribute('aria-label','あと'+(need-got)+'匹')}
+  if(need===_lf&&got===_lk)return;_lf=need;_lk=got;
+  // 「オオカミ×撃退する数」：倒すたびに数字が減る
+  e.innerHTML=WOLF_SVG.replace('class="wf"','class="wf big"')+'<span class="cnt">×'+(need-got)+'</span>';
+  e.setAttribute('aria-label','あと'+(need-got)+'匹')}
 function updHud(){$('score').textContent=score;renderLives();$('lv').textContent=Math.min(level,FINAL);
   let nl=1;while(nl<=FINAL&&kills>=GOAL[nl-1])nl++;
   renderLeft(Math.min(nl,FINAL));
